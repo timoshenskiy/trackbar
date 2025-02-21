@@ -15,7 +15,7 @@ const menuItems = [
 
 export default function AccountSidebar({ activeTab, onTabChange, onImportClick }: AccountSidebarProps) {
   return (
-    <div className="w-64 bg-gray-800 rounded-lg p-4">
+    <div className="w-64 bg-gray-900/95 border border-gray-700 rounded-lg p-4 backdrop-blur-sm">
       <nav className="space-y-2">
         {menuItems.map((item) => (
           <button
@@ -23,7 +23,7 @@ export default function AccountSidebar({ activeTab, onTabChange, onImportClick }
             onClick={() => onTabChange(item.id)}
             className={cn(
               "w-full flex items-center gap-3 px-4 py-2 rounded-lg text-left transition-colors",
-              activeTab === item.id ? "bg-purple-600 text-white" : "text-gray-300 hover:bg-gray-700",
+              activeTab === item.id ? "bg-blue-700 text-white" : "text-gray-300 hover:bg-gray-800/80",
             )}
           >
             <item.icon className="w-5 h-5" />

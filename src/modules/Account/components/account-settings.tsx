@@ -25,7 +25,7 @@ export default function AccountSettings() {
         <div className="space-y-2">
           <Label className="text-white">Language</Label>
           <Select value={language} onValueChange={setLanguage}>
-            <SelectTrigger className="w-[200px] bg-gray-700 border-gray-600 text-white">
+            <SelectTrigger className="w-[200px] bg-gray-950 border-gray-800 text-white">
               <SelectValue placeholder="Select language" />
             </SelectTrigger>
             <SelectContent>

@@ -32,7 +32,7 @@ export default function ImportGamesModal({ isOpen, onClose }: ImportGamesModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-800 text-white border-gray-700 max-w-full h-full max-h-full m-0 rounded-none">
+      <DialogContent className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 text-white border-gray-700 max-w-full h-full max-h-full m-0 rounded-none backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle>{selectedPlatform ? `Import ${selectedPlatform} Games` : "Import Your Games"}</DialogTitle>
         </DialogHeader>
@@ -41,7 +41,7 @@ export default function ImportGamesModal({ isOpen, onClose }: ImportGamesModalPr
             {gameCards.map((platform) => (
               <button
                 key={platform.id}
-                className="flex flex-col items-center justify-center p-6 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+                className="flex flex-col items-center justify-center p-6 bg-gray-800/90 rounded-lg hover:bg-gray-700/90 transition-colors border border-gray-700"
                 onClick={() => handlePlatformSelect(platform.title)}
               >
                 <platform.icon className="w-8 h-8 mb-2" />

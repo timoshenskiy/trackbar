@@ -54,7 +54,7 @@ export default function SteamGamesList({ onBack }: SteamGamesListProps) {
             placeholder="Search games..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-gray-700 border-gray-600 text-white"
+            className="pl-10 bg-gray-900/90 border-gray-700 text-white"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         </div>
@@ -62,7 +62,7 @@ export default function SteamGamesList({ onBack }: SteamGamesListProps) {
       <div className="flex-grow overflow-y-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredGames.map((game) => (
-            <div key={game.id} className="flex items-center bg-gray-700 p-4 rounded-lg">
+            <div key={game.id} className="flex items-center bg-gray-800/90 border border-gray-700 p-4 rounded-lg hover:bg-gray-700/90 transition-colors">
               <Checkbox
                 checked={selectedGames.includes(game.id)}
                 onCheckedChange={() => handleGameToggle(game.id)}

@@ -184,7 +184,7 @@ export default function GamesList() {
           ))}
         </div>
         <Select value={sortBy} onValueChange={(value: "rating" | "category" | "lastPlayed") => setSortBy(value)}>
-          <SelectTrigger className="w-[180px] bg-gray-700 border-gray-600 text-white">
+          <SelectTrigger className="w-[180px] bg-gray-900/90 border-gray-700 text-white">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
@@ -199,7 +199,7 @@ export default function GamesList() {
         {sortedGames.map((game) => (
           <div
             key={game.id}
-            className="relative bg-gray-800 rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
+            className="relative bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-gray-700 rounded-lg overflow-hidden cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
             onClick={() => handleGameClick(game)}
           >
             <div className="absolute inset-0 z-0">
@@ -243,7 +243,7 @@ export default function GamesList() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-gray-800 text-white max-w-3xl">
+        <DialogContent className="bg-gradient-to-b from-gray-900/95 to-gray-800/95 text-white border-gray-700 max-w-3xl backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle className="text-2xl">{selectedGame?.title}</DialogTitle>
           </DialogHeader>
@@ -261,7 +261,7 @@ export default function GamesList() {
               <div>
                 <label className="block text-sm font-medium text-gray-400">Status</label>
                 <Select value={selectedGame?.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white">
+                  <SelectTrigger className="w-full bg-gray-900/90 border-gray-700 text-white">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -281,7 +281,7 @@ export default function GamesList() {
                     onValueChange={([value]) => handleRatingChange(value)}
                     max={10}
                     step={1}
-                    className="flex-grow mr-4"
+                    className="flex-grow mr-4 [&>[role=slider]]:bg-blue-600 [&>[role=slider]]:border-2 [&>[role=slider]]:border-white [&>[role=slider]]:w-4 [&>[role=slider]]:h-4 [&_[data-orientation=horizontal]]:h-2 [&_[data-orientation=horizontal]]:bg-gray-700 [&_[data-orientation=horizontal]>[role=slider]]:hover:bg-blue-500"
                   />
                   <span className="text-white text-lg font-semibold">{selectedGame?.rating}/10</span>
                 </div>
@@ -291,7 +291,7 @@ export default function GamesList() {
                 <Textarea
                   value={selectedGame?.review}
                   onChange={(e) => handleReviewChange(e.target.value)}
-                  className="w-full bg-gray-700 border-gray-600 text-white"
+                  className="w-full bg-gray-900/90 border-gray-700 text-white"
                   rows={4}
                 />
               </div>

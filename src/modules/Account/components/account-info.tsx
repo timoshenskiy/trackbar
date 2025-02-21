@@ -75,7 +75,7 @@ export default function AccountInfo() {
               id="nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              className="bg-gray-700 border-gray-600 text-white"
+              className="bg-gray-900/90 border-gray-700 text-white"
             />
           </div>
           <div>
@@ -87,8 +87,8 @@ export default function AccountInfo() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {gameStats.map((stat) => (
-          <div key={stat.label} className="bg-gray-700 p-4 rounded-lg flex items-center space-x-4">
-            <stat.icon className="text-purple-400 w-8 h-8" />
+          <div key={stat.label} className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 border border-gray-700 p-4 rounded-lg flex items-center space-x-4">
+            <stat.icon className="text-blue-600 w-8 h-8" />
             <div>
               <p className="text-gray-300">{stat.label}</p>
               <p className="text-2xl font-bold text-white">{stat.value}</p>
@@ -97,7 +97,7 @@ export default function AccountInfo() {
         ))}
       </div>
 
-      <Button className="bg-purple-600 hover:bg-purple-700 text-white">Save Changes</Button>
+      <Button className="bg-blue-800 hover:bg-blue-700 text-white">Save Changes</Button>
     </div>
   )
 }
