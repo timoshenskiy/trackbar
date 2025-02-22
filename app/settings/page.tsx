@@ -1,6 +1,4 @@
-"use client";
-
-import { useState } from "react";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,19 +12,16 @@ import {
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/utils/supabase/server";
 
-const SettingsPage = () => {
-  // const supabase = await createClient();
+const SettingsPage = async () => {
+  const supabase = await createClient();
 
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // if (!user) {
-  //   return redirect("/login");
-  // }
-
-  const [steamConnected, setSteamConnected] = useState(false);
-  const [gogConnected, setGogConnected] = useState(false);
+  if (!user) {
+    return redirect("/auth");
+  }
 
   return (
     <div className="space-y-8">
