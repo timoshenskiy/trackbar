@@ -42,8 +42,6 @@ export default function Home() {
     // Handle token error UI
   }
 
-  console.log(upcomingGames, lastReleasedGames);
-
   return (
     <div className="space-y-8">
       <Banner />

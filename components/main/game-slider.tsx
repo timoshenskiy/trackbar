@@ -7,6 +7,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Gamepad2 } from "lucide-react";
 import GameCard from "@/components/main/game-card";
+import SkeletonCard from "./skeleton-card";
 
 interface GameSliderProps {
   autoScroll?: boolean;
@@ -19,7 +20,20 @@ interface GameSliderProps {
 }
 
 const getBasisClass = (visibleCount: number) => {
-  return `lg:basis-1/${visibleCount}`;
+  switch (visibleCount) {
+    case 2:
+      return 'lg:basis-1/2';
+    case 3:
+      return 'lg:basis-1/3';
+    case 4:
+      return 'lg:basis-1/4';
+    case 5:
+      return 'lg:basis-1/5';
+    case 6:
+      return 'lg:basis-1/6';
+    default:
+      return 'lg:basis-1/4';
+  }
 };
 
 const GameSlider: React.FC<GameSliderProps> = ({
@@ -47,7 +61,23 @@ const GameSlider: React.FC<GameSliderProps> = ({
     return () => clearInterval(interval);
   }, [api, autoScroll, direction, scrollInterval]);
 
-  if (!games) return null;
+  const renderContent = () => {
+    if (!games || games.length === 0) {
+      return Array(visibleCount).fill(0).map((_, index) => (
+        <CarouselItem key={`skeleton-${index}`} className={`pl-2 basis-full md:basis-1/2 ${getBasisClass(visibleCount)}`}>
+          <SkeletonCard />
+        </CarouselItem>
+      ))
+    }
+
+    return games.filter(({ cover }) => !!cover).map((game, index) => (
+      <CarouselItem key={index} className={`pl-2 basis-full md:basis-1/2 ${getBasisClass(visibleCount)}`}>
+        <div>
+          <GameCard game={game} />
+        </div>
+      </CarouselItem>
+    ))
+  }
 
   return (
     <div className="w-full bg-gray-950 p-4">
@@ -65,13 +95,7 @@ const GameSlider: React.FC<GameSliderProps> = ({
           setApi={setApi}
         >
           <CarouselContent className="-ml-2">
-            {games.filter(({ cover }) => !!cover).map((game, index) => (
-              <CarouselItem key={index} className={`pl-2 basis-full sm:basis-1/2 ${getBasisClass(visibleCount)}`}>
-                <div>
-                  <GameCard game={game} />
-                </div>
-              </CarouselItem>
-            ))}
+            {renderContent()}
           </CarouselContent>
           <CarouselPrevious className="text-white border-white hover:bg-gray-800 opacity-0 group-hover:opacity-100 transition-opacity left-0" />
           <CarouselNext className="text-white border-white hover:bg-gray-800 opacity-0 group-hover:opacity-100 transition-opacity right-0" />
