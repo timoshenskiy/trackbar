@@ -57,7 +57,7 @@ const games: Game[] = [
     year: 2024,
     type: "Main Game",
     dateAdded: "Jul 20, 2024",
-    rating: 7.9,
+    rating: 8.9,
     status: "Finished",
     playtime: 45,
     achievements: { completed: 35, total: 40 },
