@@ -48,7 +48,38 @@ const games: Game[] = [
     platform: "PC",
     source: "Steam",
   },
-  // ... other games
+  {
+    id: 2,
+    title: "Nobody Wants to Die",
+    cover:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CleanShot%202025-02-22%20at%2002.41.58@2x-8LNxRD2sWNuP5Pl3hf5qN4QjS8BMaX.png",
+    genres: ["Role-playing (RPG)", "Simulator", "Adventure"],
+    year: 2024,
+    type: "Main Game",
+    dateAdded: "Jul 20, 2024",
+    rating: 7.9,
+    status: "Finished",
+    playtime: 45,
+    achievements: { completed: 35, total: 40 },
+    metacritic: { score: 82, userScore: 8.1 },
+    platform: "PC",
+    source: "GOG",
+  },
+  {
+    id: 3,
+    title: "Cyberpunk Madness",
+    cover:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CleanShot%202025-02-22%20at%2002.41.58@2x-8LNxRD2sWNuP5Pl3hf5qN4QjS8BMaX.png",
+    genres: ["Simulator", "Adventure", "Indie"],
+    year: 2021,
+    type: "Main Game",
+    dateAdded: "Feb 19, 2025",
+    rating: 4.2,
+    status: "Playing",
+    playtime: 12,
+    platform: "PS5",
+    source: "Manual",
+  },
 ];
 
 interface ProfileContentProps {
@@ -216,66 +247,81 @@ export function ProfileContent({
       </div>
 
       {/* Game List */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="space-y-4">
         {games
           .filter(
             (game) =>
               (activeTab === "All" || game.status === activeTab) &&
               game.title.toLowerCase().includes(searchTerm.toLowerCase())
           )
-          .map((game) => (
+          .map((game, index) => (
             <div
               key={game.id}
-              className="flex gap-4 bg-[#2C2C2C] p-4 rounded-lg"
+              className="bg-[#2C2C2C] rounded-lg p-4 flex items-center gap-4"
             >
+              <span className="text-gray-400 w-6">{index + 1}</span>
               <img
-                src={game.cover}
+                src={game.cover || "/placeholder.svg"}
                 alt={game.title}
-                className="w-32 h-44 object-cover rounded-lg"
+                className="w-16 h-16 rounded object-cover"
               />
               <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium">{game.title}</h3>
-                    <div className="text-sm text-gray-400">
-                      {game.genres.join(", ")} • {game.year}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm text-gray-400">{game.rating}</div>
-                    {isOwnProfile && (
-                      <button className="text-gray-400 hover:text-white">
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                <h3 className="font-semibold mb-1 text-white">{game.title}</h3>
+                <div className="text-sm text-gray-400">
+                  {game.genres.join(", ")}
                 </div>
-                <div className="mt-4 flex gap-4 text-sm">
-                  <div>
-                    <div className="text-gray-400">Status</div>
-                    <div className="text-white">{game.status}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400">Playtime</div>
-                    <div className="text-white">{game.playtime}h</div>
-                  </div>
+                <div className="text-sm text-gray-400">
+                  {game.year} | {game.type}
+                </div>
+                <div className="flex items-center gap-4 mt-1">
+                  <div className="text-sm text-gray-400">{game.dateAdded}</div>
                   {game.achievements && (
-                    <div>
-                      <div className="text-gray-400">Achievements</div>
-                      <div className="text-white">
-                        {game.achievements.completed}/{game.achievements.total}
-                      </div>
+                    <div className="text-sm text-gray-400">
+                      🏆 {game.achievements.completed}/{game.achievements.total}
                     </div>
                   )}
-                  {game.metacritic && (
-                    <div>
-                      <div className="text-gray-400">Metacritic</div>
-                      <div className="text-white">
-                        {game.metacritic.score} • {game.metacritic.userScore}
-                      </div>
+                  {game.playtime > 0 && (
+                    <div className="text-sm text-gray-400">
+                      ⏱️ {game.playtime}h
+                    </div>
+                  )}
+                  {game.source !== "Manual" && (
+                    <div className="text-sm text-gray-400">
+                      {game.source === "Steam" ? "🎮" : "🎯"} {game.source}
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="flex items-center gap-4">
+                {game.metacritic && (
+                  <div className="text-sm">
+                    <div className="text-green-500">
+                      {game.metacritic.score}
+                    </div>
+                    <div className="text-blue-500">
+                      {game.metacritic.userScore}
+                    </div>
+                  </div>
+                )}
+                <div className="text-2xl font-bold text-white">
+                  {game.rating}
+                </div>
+                <div
+                  className={cn(
+                    "px-3 py-1 rounded-full text-sm",
+                    game.status === "Want" && "bg-blue-500 text-white",
+                    game.status === "Finished" && "bg-[#7FFFD4] text-black",
+                    game.status === "Playing" && "bg-purple-500 text-white",
+                    game.status === "Dropped" && "bg-red-500 text-white"
+                  )}
+                >
+                  {game.status}
+                </div>
+                {isOwnProfile && (
+                  <button className="text-gray-400 hover:text-white">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           ))}

@@ -14,14 +14,10 @@ export default async function UserProfilePage({
     data: { user: currentUser },
   } = await supabase.auth.getUser();
 
-  // Check if this is the current user's profile
+  // Check if this is the current user's profile (for edit permissions)
   const isOwnProfile = currentUser?.user_metadata?.username === params.username;
 
-  // If it's not the user's own profile, we'll add support for viewing other profiles later
-  // For now, only allow viewing your own profile
-  if (!isOwnProfile) {
-    notFound();
-  }
-
-  return <ProfileContent isOwnProfile={true} username={params.username} />;
+  return (
+    <ProfileContent isOwnProfile={isOwnProfile} username={params.username} />
+  );
 }
