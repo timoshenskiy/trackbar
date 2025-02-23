@@ -36,7 +36,7 @@ const Sidebar = async () => {
         <div className="w-8 h-8 rounded-lg bg-[#7FFFD4] flex items-center justify-center">
           🎮
         </div>
-        <span className="text-white font-bold text-xl">MYGAMELIST</span>
+        <span className="text-white font-bold text-xl">PLAYING QUOKKA</span>
         <span className="text-xs text-gray-400">beta</span>
       </div>
 

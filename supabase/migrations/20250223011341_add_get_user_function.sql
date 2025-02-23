@@ -1,6 +1,3 @@
--- Drop the existing function if it exists
-drop function if exists public.get_user_by_username(text);
-
 -- Create the function
 create or replace function public.get_user_by_username(p_username text)
 returns json
