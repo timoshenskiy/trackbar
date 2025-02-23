@@ -118,13 +118,23 @@ export function AuthForm({ searchParams }: { searchParams: Message }) {
                 <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
                   <Label htmlFor="email">Email</Label>
                   <Input name="email" placeholder="you@example.com" required />
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    name="username"
+                    placeholder="Choose a username"
+                    required
+                    pattern="^[a-zA-Z0-9_]{3,15}$"
+                    title="Username must be 3-15 characters long and can only contain letters, numbers, and underscores"
+                  />
                   <Label htmlFor="password">Password</Label>
                   <Input
                     type="password"
                     name="password"
                     placeholder="Your password"
-                    minLength={6}
+                    minLength={8}
                     required
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%\^&*])[A-Za-z0-9!@#$%\^&*]{8,}$"
+                    title="Must contain at least 8 characters, including: uppercase letter, lowercase letter, number, and special character (!@#$%^&*)"
                   />
                   <SubmitButton
                     formAction={signUpAction}

@@ -36,10 +36,12 @@ const Sidebar = async () => {
       {user ? (
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
-            N
+            {user.user_metadata.username?.[0].toUpperCase() ?? "U"}
           </div>
           <div>
-            <div className="font-medium">{user.email}</div>
+            <div className="font-medium">
+              {user.user_metadata.username ?? user.email}
+            </div>
             <div className="text-sm text-gray-400">@nezdemkovski</div>
           </div>
         </div>

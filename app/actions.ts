@@ -8,11 +8,37 @@ import { redirect } from "next/navigation";
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const username = formData.get("username")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
-  if (!email || !password) {
-    return encodedRedirect("error", "/auth", "Email and password are required");
+  if (!email || !password || !username) {
+    return encodedRedirect(
+      "error",
+      "/auth",
+      "Email, username and password are required"
+    );
+  }
+
+  // Validate username format
+  const usernameRegex = /^[a-zA-Z0-9_]{3,15}$/;
+  if (!usernameRegex.test(username)) {
+    return encodedRedirect(
+      "error",
+      "/auth",
+      "Username must be 3-15 characters long and can only contain letters, numbers, and underscores"
+    );
+  }
+
+  // Validate password strength
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%\^&*])[A-Za-z0-9!@#$%\^&*]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return encodedRedirect(
+      "error",
+      "/auth",
+      "Password must contain at least 8 characters, including: uppercase letter, lowercase letter, number, and special character (!@#$%^&*)"
+    );
   }
 
   const { error } = await supabase.auth.signUp({
@@ -20,6 +46,9 @@ export const signUpAction = async (formData: FormData) => {
     password,
     options: {
       emailRedirectTo: `${origin}/api/auth/callback`,
+      data: {
+        username: username,
+      },
     },
   });
 
