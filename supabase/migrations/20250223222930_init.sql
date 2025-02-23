@@ -46,19 +46,19 @@ CREATE TABLE games (
 );
 
 -- Game relationships and metadata
-CREATE TABLE game_platforms (
+CREATE TABLE game_to_platforms (
     game_id BIGINT REFERENCES games(id),
     platform_id BIGINT REFERENCES platforms(id),
     PRIMARY KEY (game_id, platform_id)
 );
 
-CREATE TABLE game_genres (
+CREATE TABLE game_to_genres (
     game_id BIGINT REFERENCES games(id),
     genre_id BIGINT REFERENCES genres(id),
     PRIMARY KEY (game_id, genre_id)
 );
 
-CREATE TABLE game_game_modes (
+CREATE TABLE game_to_modes (
     game_id BIGINT REFERENCES games(id),
     game_mode_id BIGINT REFERENCES game_modes(id),
     PRIMARY KEY (game_id, game_mode_id)
@@ -173,8 +173,8 @@ CREATE INDEX idx_games_slug ON games(slug);
 CREATE INDEX idx_user_games_user_id ON user_games(user_id);
 CREATE INDEX idx_user_games_status ON user_games(status);
 CREATE INDEX idx_user_games_game_id ON user_games(game_id);
-CREATE INDEX idx_game_platforms_game_id ON game_platforms(game_id);
-CREATE INDEX idx_game_genres_game_id ON game_genres(game_id);
+CREATE INDEX idx_game_to_platforms_game_id ON game_to_platforms(game_id);
+CREATE INDEX idx_game_to_genres_game_id ON game_to_genres(game_id);
 CREATE INDEX idx_game_screenshots_game_id ON game_screenshots(game_id);
 
 -- Row Level Security (RLS) policies
@@ -216,13 +216,13 @@ CREATE POLICY "Reference tables are publicly readable" ON website_types
 CREATE POLICY "Games are publicly readable" ON games
     FOR SELECT USING (true);
 
-CREATE POLICY "Game platforms are publicly readable" ON game_platforms
+CREATE POLICY "Game platforms are publicly readable" ON game_to_platforms
     FOR SELECT USING (true);
 
-CREATE POLICY "Game genres are publicly readable" ON game_genres
+CREATE POLICY "Game genres are publicly readable" ON game_to_genres
     FOR SELECT USING (true);
 
-CREATE POLICY "Game modes are publicly readable" ON game_game_modes
+CREATE POLICY "Game modes are publicly readable" ON game_to_modes
     FOR SELECT USING (true);
 
 CREATE POLICY "Game websites are publicly readable" ON game_websites
@@ -319,3 +319,31 @@ USING (
   bucket_id = 'game-images' AND
   auth.uid() IS NOT NULL
 );
+
+
+-- Create the function
+create or replace function public.get_user_by_username(p_username text)
+returns json
+language plpgsql
+security definer
+set search_path = public
+stable
+as $$
+declare
+  v_result json;
+begin
+  -- Get the user metadata
+  select json_build_object(
+    'id', au.id,
+    'full_name', au.raw_user_meta_data->>'full_name',
+    'avatar_url', au.raw_user_meta_data->>'avatar_url',
+    'username', au.raw_user_meta_data->>'username'
+  )
+  into v_result
+  from auth.users au
+  where (au.raw_user_meta_data->>'username')::text = p_username;
+
+  -- Return the result (will be null if no user found)
+  return v_result;
+end;
+$$; 

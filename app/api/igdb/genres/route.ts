@@ -20,16 +20,6 @@ const clientId = process.env.TWITCH_CLIENT_ID;
 const accessToken = process.env.TWITCH_ACCESS_TOKEN;
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const name = searchParams.get("name");
-
-  if (!name) {
-    return NextResponse.json(
-      { error: "'name' parameter is required" },
-      { status: 400 }
-    );
-  }
-
   if (!clientId || !accessToken) {
     return NextResponse.json(
       { error: "TWITCH credentials are not set" },
@@ -37,27 +27,15 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const url = "https://api.igdb.com/v4/games";
+  const url = "https://api.igdb.com/v4/genres";
   const headers = {
     "Client-ID": process.env.TWITCH_CLIENT_ID ?? "",
     Authorization: `Bearer ${process.env.TWITCH_ACCESS_TOKEN}`,
   };
-  //   const body = `
-  //     search "${gameName}";
-  //     fields name, summary, storyline, cover.url, genres.name, platforms.name,
-  //            release_dates.human, age_ratings.rating, age_ratings.category,
-  //            involved_companies.company.name, involved_companies.developer,
-  //            involved_companies.publisher;
-  //     expand cover, genres, platforms, release_dates, age_ratings,
-  //            involved_companies.company;
-  //     limit 1;
-  //   `;
+
   const body = `
-    search "${name}";
-    fields *, name, slug, genres.name, platforms.name, first_release_date, release_dates.*, cover.*, screenshots.url, screenshots.width, screenshots.height,
-              artworks.*, involved_companies.company.name,
-              involved_companies.company.slug;
-    limit 10;
+    fields name, slug;
+    limit 500;
   `;
 
   try {
