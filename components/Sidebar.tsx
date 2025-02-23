@@ -6,20 +6,24 @@ import { SidebarSearch } from "./SidebarSearch";
 import { createClient } from "@/utils/supabase/server";
 import { Button } from "./ui/button";
 
-const navigation = [
-  { name: "Home", href: "/", icon: Home },
-  { name: "My Games", href: "/profile", icon: Gamepad2 },
-  // { name: "Community", href: "/community", icon: Users },
-  // { name: "Notifications", href: "/notifications", icon: Bell },
-  { name: "Settings", href: "/settings", icon: Settings },
-];
-
 const Sidebar = async () => {
   const supabase = await createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const navigation = [
+    { name: "Home", href: "/", icon: Home },
+    {
+      name: "My Games",
+      href: user ? `/${user.user_metadata.username}` : "/profile",
+      icon: Gamepad2,
+    },
+    // { name: "Community", href: "/community", icon: Users },
+    // { name: "Notifications", href: "/notifications", icon: Bell },
+    { name: "Settings", href: "/settings", icon: Settings },
+  ];
 
   return (
     <div className="w-64 border-r border-white/10 p-6 flex flex-col">
