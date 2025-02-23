@@ -44,9 +44,11 @@ const Sidebar = async () => {
           </div>
           <div>
             <div className="font-medium">
-              {user.user_metadata.username ?? user.email}
+              {user.user_metadata.full_name || user.user_metadata.username}
             </div>
-            <div className="text-sm text-gray-400">@nezdemkovski</div>
+            <div className="text-sm text-gray-400">
+              @{user.user_metadata.username}
+            </div>
           </div>
         </div>
       ) : (

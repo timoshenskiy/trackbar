@@ -1,7 +1,4 @@
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -11,6 +8,8 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/utils/supabase/server";
+import { Button } from "@/components/ui/button";
+import { UserSettingsForm } from "./user-settings-form";
 
 const SettingsPage = async () => {
   const supabase = await createClient();
@@ -32,20 +31,14 @@ const SettingsPage = async () => {
           <CardTitle>User Settings</CardTitle>
           <CardDescription>Manage your account information</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input id="fullName" placeholder="John Doe" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="handle">Handle</Label>
-            <Input id="handle" placeholder="@johndoe" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea id="bio" placeholder="Tell us about yourself" />
-          </div>
-          <Button>Save Changes</Button>
+        <CardContent>
+          <UserSettingsForm
+            initialData={{
+              fullName: user.user_metadata.full_name,
+              username: user.user_metadata.username,
+              bio: user.user_metadata.bio,
+            }}
+          />
         </CardContent>
       </Card>
 

@@ -18,6 +18,10 @@ export default async function UserProfilePage({
   const isOwnProfile = currentUser?.user_metadata?.username === params.username;
 
   return (
-    <ProfileContent isOwnProfile={isOwnProfile} username={params.username} />
+    <ProfileContent
+      isOwnProfile={isOwnProfile}
+      username={params.username}
+      fullName={currentUser?.user_metadata?.full_name}
+    />
   );
 }

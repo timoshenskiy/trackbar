@@ -85,11 +85,13 @@ const games: Game[] = [
 interface ProfileContentProps {
   isOwnProfile: boolean;
   username: string;
+  fullName?: string;
 }
 
 export function ProfileContent({
   isOwnProfile,
   username,
+  fullName,
 }: ProfileContentProps) {
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
@@ -129,7 +131,9 @@ export function ProfileContent({
             {username[0].toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">{username}</h1>
+            <h1 className="text-2xl font-bold text-white">
+              {fullName || username}
+            </h1>
             <div className="text-gray-400 text-sm">@{username}</div>
             <div className="flex gap-8 mt-2">
               <div>
