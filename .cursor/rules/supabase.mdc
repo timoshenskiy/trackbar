@@ -1,5 +1,5 @@
 ---
-description: Supabase Best practies
+description: Supabase Best practices
 globs: /**/*.(ts|tsx)
 ---
 - Use Supabase SDK for data fetching and querying.
