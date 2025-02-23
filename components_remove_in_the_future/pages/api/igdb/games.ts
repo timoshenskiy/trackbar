@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const response = await axios.post(`https://api.igdb.com/v4/${endpoint}`, data, {
       headers: {
         'Authorization': accessToken,
-        'Client-ID': process.env.NEXT_PUBLIC_CLIENT_ID,
+        'Client-ID': process.env.TWITCH_CLIENT_ID,
         'Accept': 'application/json'
       }
     });

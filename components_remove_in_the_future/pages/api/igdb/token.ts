@@ -8,8 +8,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const response = await axios.post('https://id.twitch.tv/oauth2/token', {
-      client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
-      client_secret: process.env.NEXT_PUBLIC_SECRET,
+      client_id: process.env.TWITCH_CLIENT_ID,
+      client_secret: process.env.TWITCH_CLIENT_SECRET,
       grant_type: 'client_credentials'
     });
 

@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Sidebar from "@/components/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { GameProvider } from "@/contexts/GameContext";
+import QueryProvider from "@/providers/QueryProvider";
 
 import "./globals.css";
 
@@ -27,19 +28,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-        >
-          <GameProvider>
-            <div className="flex min-h-screen bg-[#1C1C1C]">
-              <Sidebar />
-              <main className="flex-1">{children}</main>
-              <Toaster />
-            </div>
-          </GameProvider>
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+          >
+            <GameProvider>
+              <div className="flex min-h-screen bg-[#1C1C1C] max-w-[100vw] overflow-x-hidden">
+                <Sidebar />
+                <main className="flex-1 max-w-[100%] overflow-x-hidden">{children}</main>
+                <Toaster />
+              </div>
+            </GameProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );
