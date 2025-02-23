@@ -37,6 +37,7 @@ const SettingsPage = async () => {
               fullName: user.user_metadata.full_name,
               username: user.user_metadata.username,
               bio: user.user_metadata.bio,
+              avatarUrl: user.user_metadata.avatar_url,
             }}
           />
         </CardContent>

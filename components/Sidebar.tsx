@@ -43,9 +43,18 @@ const Sidebar = async () => {
       {/* User Profile */}
       {user ? (
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
-            {user.user_metadata.username?.[0].toUpperCase() ?? "U"}
-          </div>
+          {user.user_metadata?.avatar_url ? (
+            <img
+              src={user.user_metadata.avatar_url}
+              alt={`${user.user_metadata.username}'s avatar`}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+              {user.user_metadata.username?.[0].toUpperCase() ?? "U"}
+            </div>
+          )}
+
           <div>
             <div className="font-medium">
               {user.user_metadata.full_name || user.user_metadata.username}

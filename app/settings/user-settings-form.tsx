@@ -121,21 +121,21 @@ export function UserSettingsForm({ initialData }: UserSettingsFormProps) {
       <div className="flex items-center gap-4">
         <div
           onClick={handleAvatarClick}
-          className="relative w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center cursor-pointer group overflow-hidden"
+          className="relative w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center cursor-pointer group overflow-hidden border border-gray-600"
         >
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt="Avatar"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover absolute inset-0"
             />
           ) : (
             <span className="text-3xl text-white">
               {formData.username?.[0]?.toUpperCase() ?? "U"}
             </span>
           )}
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <Camera className="w-6 h-6 text-white" />
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
+            <Camera className="w-6 h-6 text-white transform scale-90 group-hover:scale-100 transition-transform duration-200" />
           </div>
         </div>
         <input
