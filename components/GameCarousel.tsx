@@ -16,7 +16,7 @@ export default function GameCarousel({ type }: GameCarouselProps) {
   return (
     <div className="flex space-x-4 overflow-x-auto pb-4">
       {games.map((game) => (
-        <Card key={game.id} className="w-[150px] flex-shrink-0">
+        <Card key={game.id} className="w-[150px] flex-shrink-0 bg-quokka-dark/50 border-quokka-purple/20">
           <CardContent className="p-2">
             <Image
               src={game.image || "/placeholder.svg"}
@@ -25,7 +25,7 @@ export default function GameCarousel({ type }: GameCarouselProps) {
               height={200}
               className="rounded-md"
             />
-            <p className="mt-2 text-sm font-medium text-center">{game.title}</p>
+            <p className="mt-2 text-sm font-medium text-center text-quokka-light">{game.title}</p>
           </CardContent>
         </Card>
       ))}

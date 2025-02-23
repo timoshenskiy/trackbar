@@ -19,14 +19,7 @@ interface GameSliderProps {
 }
 
 const getBasisClass = (visibleCount: number) => {
-  switch (visibleCount) {
-    case 3:
-      return 'lg:basis-1/3';
-    case 4:
-      return 'lg:basis-1/4';
-    default:
-      return 'lg:basis-1/4';
-  }
+  return `lg:basis-1/${visibleCount}`;
 };
 
 const GameSlider: React.FC<GameSliderProps> = ({
@@ -74,7 +67,7 @@ const GameSlider: React.FC<GameSliderProps> = ({
           <CarouselContent className="-ml-2">
             {games.filter(({ cover }) => !!cover).map((game, index) => (
               <CarouselItem key={index} className={`pl-2 basis-full sm:basis-1/2 ${getBasisClass(visibleCount)}`}>
-                <div className="h-[200px]">
+                <div>
                   <GameCard game={game} />
                 </div>
               </CarouselItem>

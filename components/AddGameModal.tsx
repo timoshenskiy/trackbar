@@ -39,7 +39,7 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-[#1C1C1C] border-0 text-white max-w-2xl p-0">
+      <DialogContent className="bg-quokka-dark border-0 text-quokka-light max-w-2xl p-0">
         <div className="relative p-6">
           <button
             onClick={onClose}
@@ -73,8 +73,8 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
                 key={statusOption}
                 onClick={() => setStatus(statusOption)}
                 className={cn(
-                  "py-2 px-4 rounded-full border border-gray-600 text-center",
-                  status === statusOption ? "bg-white/10" : "hover:bg-white/5"
+                  "py-2 px-4 rounded-full border border-quokka-purple/20 text-center",
+                  status === statusOption ? "bg-quokka-purple/10" : "hover:bg-quokka-purple/5"
                 )}
               >
                 {statusOption}
@@ -100,7 +100,7 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
                 className="absolute top-0 w-full h-[2px] opacity-0 cursor-pointer"
               />
               <div
-                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-[#7FFFD4] rounded-full transition-all duration-200"
+                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-quokka-cyan rounded-full transition-all duration-200"
                 style={{ left: `${(rating / 10) * 100}%` }}
               ></div>
             </div>
@@ -117,7 +117,7 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
           {/* Add Game Button */}
           <button
             onClick={handleSubmit}
-            className="w-full py-4 bg-[#7FFFD4] text-black rounded-full font-semibold hover:bg-[#6FE5C4] transition-colors"
+            className="w-full py-4 bg-quokka-cyan text-quokka-dark rounded-full font-semibold hover:bg-quokka-cyan/80 transition-colors"
           >
             Add game
           </button>

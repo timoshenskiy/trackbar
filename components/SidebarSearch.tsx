@@ -11,7 +11,7 @@ export function SidebarSearch() {
     <>
       <button
         onClick={() => setIsAddGameModalOpen(true)}
-        className="w-full bg-[#7FFFD4] text-black rounded-full py-3 px-4 mb-8 flex items-center gap-2 hover:bg-[#6FE5C4] transition-colors"
+        className="w-full bg-quokka-cyan text-quokka-dark rounded-full py-3 px-4 mb-8 flex items-center gap-2 hover:bg-quokka-cyan/80 transition-colors"
       >
         <Search className="w-5 h-5" />
         Game

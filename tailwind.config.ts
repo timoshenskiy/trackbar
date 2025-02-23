@@ -11,6 +11,12 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+            quokka: {
+                purple: '#7A5FFF',
+                dark: '#252735',
+                light: '#F6F8FD',
+                cyan: '#67FFF2'
+            },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

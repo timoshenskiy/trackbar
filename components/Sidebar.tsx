@@ -30,14 +30,14 @@ const Sidebar = async () => {
   ];
 
   return (
-    <div className="w-64 border-r border-white/10 p-6 flex flex-col">
+    <div className="w-64 border-r border-quokka-dark/10 p-6 flex flex-col">
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8">
-        <div className="w-8 h-8 rounded-lg bg-[#7FFFD4] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-quokka-cyan flex items-center justify-center">
           🎮
         </div>
-        <span className="text-white font-bold text-xl">PLAYING QUOKKA</span>
-        <span className="text-xs text-gray-400">beta</span>
+        <span className="text-quokka-light font-bold text-xl">PLAYING QUOKKA</span>
+        <span className="text-xs text-quokka-light/40">beta</span>
       </div>
 
       {/* User Profile */}
@@ -81,7 +81,7 @@ const Sidebar = async () => {
             href={item.href}
             className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium",
-              "text-gray-400 hover:text-white hover:bg-white/5"
+              "text-quokka-light/40 hover:text-quokka-light hover:bg-quokka-purple/5"
             )}
           >
             <item.icon className="w-5 h-5" />

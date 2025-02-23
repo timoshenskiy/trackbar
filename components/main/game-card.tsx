@@ -47,7 +47,7 @@ const GameCard = ({ game }: GameCardProps) => {
   } as const
 
   return (
-    <Card className="relative overflow-hidden group/card hover:bg-gray-900 transition-colors h-[320px] border-0">
+    <Card className="relative overflow-hidden group/card hover:bg-gray-900 transition-colors aspect-[4/3] border-0">
       {/* Blurred background */}
       <div
         className="absolute inset-0 bg-cover bg-center blur-xl brightness-50 scale-110"
