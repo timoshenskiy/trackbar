@@ -4,3 +4,5 @@ globs: *
 ---
 - Always use TypeScript.
 - Use pnpm as a project package manager.
+- Architecture of the project is always stored in /diagram-architecture.md.
+- Application Flow Diagram of the visual part (frontend) is always stored in /diagram-flow.md.
