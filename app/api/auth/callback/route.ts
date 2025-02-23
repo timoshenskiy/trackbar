@@ -12,13 +12,16 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { data } = await supabase.auth.exchangeCodeForSession(code);
+    const username = data.user?.user_metadata.username;
+
+    if (redirectTo) {
+      return NextResponse.redirect(`${origin}${redirectTo}`);
+    }
+
+    // URL to redirect to after sign up process completes
+    return NextResponse.redirect(`${origin}/${username}`);
   }
 
-  if (redirectTo) {
-    return NextResponse.redirect(`${origin}${redirectTo}`);
-  }
-
-  // URL to redirect to after sign up process completes
-  return NextResponse.redirect(`${origin}/profile`);
+  return NextResponse.redirect(`${origin}`);
 }

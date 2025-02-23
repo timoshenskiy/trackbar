@@ -15,11 +15,15 @@ const Sidebar = async () => {
 
   const navigation = [
     { name: "Home", href: "/", icon: Home },
-    {
-      name: "My Games",
-      href: user ? `/${user.user_metadata.username}` : "/profile",
-      icon: Gamepad2,
-    },
+    ...(user
+      ? [
+          {
+            name: "My Games",
+            href: `/${user.user_metadata.username}`,
+            icon: Gamepad2,
+          },
+        ]
+      : []),
     // { name: "Community", href: "/community", icon: Users },
     // { name: "Notifications", href: "/notifications", icon: Bell },
     { name: "Settings", href: "/settings", icon: Settings },

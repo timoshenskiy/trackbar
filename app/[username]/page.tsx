@@ -14,14 +14,26 @@ export default async function UserProfilePage({
     data: { user: currentUser },
   } = await supabase.auth.getUser();
 
+  // Get user by username from metadata
+  const { data: userData, error } = await supabase.rpc("get_user_by_username", {
+    p_username: params.username,
+  });
+
+  // If no user found with this username, return 404
+  if (!userData || error) {
+    console.error("Error finding user:", error);
+    notFound();
+  }
+
   // Check if this is the current user's profile (for edit permissions)
   const isOwnProfile = currentUser?.user_metadata?.username === params.username;
 
   return (
     <ProfileContent
       isOwnProfile={isOwnProfile}
-      username={params.username}
-      fullName={currentUser?.user_metadata?.full_name}
+      username={userData.username}
+      fullName={userData.full_name}
+      avatarUrl={userData.avatar_url}
     />
   );
 }

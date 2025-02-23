@@ -15,7 +15,7 @@ export default async function AuthPage({
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/profile");
+    redirect(`/${user.user_metadata.username}`);
   }
 
   return <AuthForm searchParams={searchParams} />;

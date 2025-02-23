@@ -82,16 +82,18 @@ const games: Game[] = [
   },
 ];
 
-interface ProfileContentProps {
+export interface ProfileContentProps {
   isOwnProfile: boolean;
   username: string;
   fullName?: string;
+  avatarUrl?: string;
 }
 
 export function ProfileContent({
   isOwnProfile,
   username,
   fullName,
+  avatarUrl,
 }: ProfileContentProps) {
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
@@ -127,8 +129,18 @@ export function ProfileContent({
       {/* Profile Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center text-2xl">
-            {username[0].toUpperCase()}
+          <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={`${username}'s avatar`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl text-white">
+                {username[0].toUpperCase()}
+              </span>
+            )}
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">
