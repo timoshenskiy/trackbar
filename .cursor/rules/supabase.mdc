@@ -8,3 +8,4 @@ globs: /**/*.(ts|tsx)
 - Use Supabase's authentication and authorization features.
 - Follow best practices for data validation and sanitization.
 - Implement proper caching strategies for data fetching.
+- Always keep Supabase ts types in /database.types.ts file.

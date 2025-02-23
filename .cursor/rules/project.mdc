@@ -1,0 +1,6 @@
+---
+description: Overall project rules
+globs: *
+---
+- Always use TypeScript.
+- Use pnpm as a project package manager.
