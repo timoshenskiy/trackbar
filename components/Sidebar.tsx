@@ -5,6 +5,7 @@ import SignOutButton from "./SignOutButton";
 import { SidebarSearch } from "./SidebarSearch";
 import { createClient } from "@/utils/supabase/server";
 import { Button } from "./ui/button";
+import { Logo } from "./ui/logo";
 
 const Sidebar = async () => {
   const supabase = await createClient();
@@ -33,10 +34,10 @@ const Sidebar = async () => {
     <div className="w-64 border-r border-quokka-dark/10 p-6 flex flex-col">
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8">
-        <div className="w-8 h-8 rounded-lg bg-quokka-cyan flex items-center justify-center">
-          🎮
+        <div className="w-12 h-12 rounded-full bg-quokka-cyan flex items-center justify-center">
+          <Logo size={200}/>
         </div>
-        <span className="text-quokka-light font-bold text-xl">PLAYING QUOKKA</span>
+        <span className="text-quokka-light font-bold text-xl">QUOKKA</span>
         <span className="text-xs text-quokka-light/40">beta</span>
       </div>
 

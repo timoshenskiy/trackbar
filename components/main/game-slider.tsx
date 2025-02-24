@@ -46,20 +46,37 @@ const GameSlider: React.FC<GameSliderProps> = ({
   visibleCount = 4,
 }) => {
   const [api, setApi] = React.useState<CarouselApi>();
+  const [isPaused, setIsPaused] = React.useState(false);
 
   useEffect(() => {
     if (!api || !autoScroll) return;
 
     const interval = setInterval(() => {
-      if (direction === 'right') {
-        api.scrollNext();
-      } else {
-        api.scrollPrev();
+      if (!isPaused) {
+        if (direction === 'right') {
+          api.scrollNext();
+        } else {
+          api.scrollPrev();
+        }
       }
     }, scrollInterval);
 
     return () => clearInterval(interval);
-  }, [api, autoScroll, direction, scrollInterval]);
+  }, [api, autoScroll, direction, scrollInterval, isPaused]);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const onSelect = () => {
+      setIsPaused(true);
+      setTimeout(() => setIsPaused(false), 5000);
+    };
+
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
 
   const renderContent = () => {
     if (!games || games.length === 0) {
@@ -80,12 +97,12 @@ const GameSlider: React.FC<GameSliderProps> = ({
   }
 
   return (
-    <div className="w-full bg-gray-950 p-4">
+    <div className="w-full max-w-[1440px] mx-auto bg-gray-950 p-4 relative z-0">
       <div className="flex items-center gap-2 mb-2">
         {icon}
         <h2 className="text-xl font-bold text-white">{title}</h2>
       </div>
-      <div className="relative group px-8">
+      <div className="relative">
         <Carousel
           opts={{
             align: "start",
@@ -94,11 +111,13 @@ const GameSlider: React.FC<GameSliderProps> = ({
           className="w-full"
           setApi={setApi}
         >
+          <div className="absolute right-0 -top-12 flex items-center gap-2 z-10">
+            <CarouselPrevious className="relative text-white border-white hover:bg-gray-800 static translate-y-0" />
+            <CarouselNext className="relative text-white border-white hover:bg-gray-800 static translate-y-0" />
+          </div>
           <CarouselContent className="-ml-2">
             {renderContent()}
           </CarouselContent>
-          <CarouselPrevious className="text-white border-white hover:bg-gray-800 opacity-0 group-hover:opacity-100 transition-opacity left-0" />
-          <CarouselNext className="text-white border-white hover:bg-gray-800 opacity-0 group-hover:opacity-100 transition-opacity right-0" />
         </Carousel>
       </div>
     </div>

@@ -14,6 +14,7 @@ const config: Config = {
             quokka: {
                 purple: '#7A5FFF',
                 dark: '#252735',
+                darker: '#030712',
                 light: '#F6F8FD',
                 cyan: '#67FFF2'
             },

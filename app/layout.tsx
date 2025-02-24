@@ -35,8 +35,8 @@ export default function RootLayout({
             enableSystem={false}
           >
             <GameProvider>
-              <div className="flex min-h-screen bg-[#030712] max-w-[100vw] overflow-x-hidden">
-                <Sidebar />
+              <div className="flex min-h-screen bg-quokka-darker max-w-[100vw] overflow-x-hidden">
+                {/* <Sidebar /> */}
                 <main className="flex-1 max-w-[100%] overflow-x-hidden">{children}</main>
                 <Toaster />
               </div>

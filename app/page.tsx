@@ -7,6 +7,7 @@ import Banner from "@/components/main/banner";
 import ProductFeatures from "@/components/main/product-features";
 import GameSlider from '@/components/main/game-slider';
 import Footer from "@/components/main/footer";
+import Header from '@/components/main/header';
 
 export default function Home() {
   const { data: token, error: tokenError } = useQuery({
@@ -44,6 +45,7 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
+      <Header />
       <Banner />
       <ProductFeatures />
       <GameSlider
