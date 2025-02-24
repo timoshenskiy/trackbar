@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,13 @@ interface AddGameModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  game: GameSearchResult;
+  game: GameSearchResult & {
+    userStatus?: string;
+    userRating?: number;
+    userReview?: string;
+    userGameId?: number;
+  };
+  isEditing?: boolean;
 }
 
 export default function AddGameModal({
@@ -22,6 +28,7 @@ export default function AddGameModal({
   onClose,
   onSuccess,
   game,
+  isEditing = false,
 }: AddGameModalProps) {
   const [status, setStatus] = useState<
     "Finished" | "Playing" | "Dropped" | "Want"
@@ -30,6 +37,35 @@ export default function AddGameModal({
   const [review, setReview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+
+  // Initialize with existing data if editing
+  useEffect(() => {
+    if (isEditing && game) {
+      // Try to extract status from game data if available
+      if (game.userStatus) {
+        const statusMap: Record<string, "Finished" | "Playing" | "Dropped" | "Want"> = {
+          finished: "Finished",
+          playing: "Playing",
+          dropped: "Dropped",
+          want_to_play: "Want"
+        };
+        setStatus(statusMap[game.userStatus] || "Want");
+      }
+      
+      // Set rating if available
+      if (game.userRating !== undefined) {
+        setRating(game.userRating);
+      } else if (game.total_rating) {
+        // Use game's total rating as a fallback
+        setRating(game.total_rating / 10); // Convert from 0-100 to 0-10
+      }
+      
+      // Set review if available
+      if (game.userReview) {
+        setReview(game.userReview);
+      }
+    }
+  }, [game, isEditing]);
 
   const getRatingEmoji = useMemo(() => {
     if (rating === 0) return "🤔";
@@ -66,24 +102,40 @@ export default function AddGameModal({
         | "dropped"
         | "want_to_play";
 
-      const { error } = await supabase.from("user_games").insert({
-        user_id: user.id,
-        game_id: game.id,
-        status: dbStatus,
-        rating: Math.round(rating), // Keep rating in 0-10 range
-        review: review,
-        source: "manual",
-        platform_id: game.platforms?.[0]?.id, // Use first platform as default
-      });
+      if (isEditing && game.userGameId) {
+        // Update existing game
+        const { error } = await supabase
+          .from("user_games")
+          .update({
+            status: dbStatus,
+            rating: Math.round(rating * 10), // Convert to 0-100 range for storage
+            review: review,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", game.userGameId);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Add new game
+        const { error } = await supabase.from("user_games").insert({
+          user_id: user.id,
+          game_id: game.id,
+          status: dbStatus,
+          rating: Math.round(rating * 10), // Convert to 0-100 range for storage
+          review: review,
+          source: "manual",
+          platform_id: game.platforms?.[0]?.id, // Use first platform as default
+        });
+
+        if (error) throw error;
+      }
 
       // Invalidate the userGames query to trigger a refresh
       queryClient.invalidateQueries({ queryKey: ["userGames"] });
 
       onSuccess();
     } catch (error) {
-      console.error("Error adding game:", error);
+      console.error("Error saving game:", error);
       // TODO: Show error toast
     } finally {
       setIsSubmitting(false);
@@ -169,7 +221,7 @@ export default function AddGameModal({
             className="min-h-[200px] bg-[#2C2C2C] border-0 text-white placeholder:text-gray-400 mb-8"
           />
 
-          {/* Add Game Button */}
+          {/* Add/Update Game Button */}
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
@@ -180,7 +232,9 @@ export default function AddGameModal({
                 : "hover:bg-quokka-cyan/80"
             )}
           >
-            {isSubmitting ? "Adding game..." : "Add game"}
+            {isSubmitting 
+              ? (isEditing ? "Updating game..." : "Adding game...") 
+              : (isEditing ? "Update game" : "Add game")}
           </button>
         </div>
       </DialogContent>

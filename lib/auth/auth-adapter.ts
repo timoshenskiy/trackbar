@@ -12,6 +12,8 @@ class AuthAdapter {
   private static instance: AuthAdapter;
   private supabase = createClient();
   private listeners: Set<(user: AuthUser | null) => void> = new Set();
+  private cachedUser: AuthUser | null | undefined;
+  private fetchPromise: Promise<AuthUser | null> | null = null;
 
   private constructor() {
     // Initialize auth state listener
@@ -24,8 +26,10 @@ class AuthAdapter {
           fullName: session.user.user_metadata.full_name,
           avatarUrl: session.user.user_metadata.avatar_url,
         };
+        this.cachedUser = user;
         this.notifyListeners(user);
       } else {
+        this.cachedUser = null;
         this.notifyListeners(null);
       }
     });
@@ -39,16 +43,40 @@ class AuthAdapter {
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {
-    const { data: { user } } = await this.supabase.auth.getUser();
-    if (!user) return null;
+    // Return cached user if available
+    if (this.cachedUser !== undefined) {
+      return this.cachedUser;
+    }
 
-    return {
-      id: user.id,
-      email: user.email ?? undefined,
-      username: user.user_metadata.username,
-      fullName: user.user_metadata.full_name,
-      avatarUrl: user.user_metadata.avatar_url,
-    };
+    // If there's already a fetch in progress, return its promise
+    if (this.fetchPromise) {
+      return this.fetchPromise;
+    }
+
+    // Create new fetch promise
+    this.fetchPromise = (async () => {
+      try {
+        const { data: { user } } = await this.supabase.auth.getUser();
+        if (!user) {
+          this.cachedUser = null;
+          return null;
+        }
+
+        const authUser: AuthUser = {
+          id: user.id,
+          email: user.email ?? undefined,
+          username: user.user_metadata.username,
+          fullName: user.user_metadata.full_name,
+          avatarUrl: user.user_metadata.avatar_url,
+        };
+        this.cachedUser = authUser;
+        return authUser;
+      } finally {
+        this.fetchPromise = null;
+      }
+    })();
+
+    return this.fetchPromise;
   }
 
   subscribe(callback: (user: AuthUser | null) => void) {
@@ -62,6 +90,7 @@ class AuthAdapter {
   }
 
   async signOut() {
+    this.cachedUser = null;
     await this.supabase.auth.signOut();
   }
 }

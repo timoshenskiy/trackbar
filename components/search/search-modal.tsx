@@ -1,92 +1,120 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Star } from "lucide-react"
+import { Search } from "lucide-react"
 import Modal from "../ui/modal"
+import { useGameSearch } from "@/hooks/useGameSearch"
+import { GameSearchResult } from "@/utils/types/game"
+import { useQuery } from "@tanstack/react-query"
+import { igdbAdapter } from "@/adapters/igdb"
+import AddGameModal from "../AddGameModal"
 
 interface SearchModalProps {
     isOpen: boolean
     onClose: () => void
 }
 
-interface GameResult {
-    id: number
-    title: string
-    coverImage: string
-    releaseDate: string
-    rating: number
-    genre: string
-    platform: string
-}
-
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const [searchQuery, setSearchQuery] = useState("")
-    
-    // Mock data - replace with actual game API call
-    const searchResults: GameResult[] = [
-        {
-            id: 1,
-            title: "The Last Journey",
-            coverImage: "https://via.placeholder.com/300x400",
-            releaseDate: "2023",
-            rating: 4.5,
-            genre: "Action RPG",
-            platform: "PC, PS5, Xbox Series X"
-        },
-        {
-            id: 2,
-            title: "Space Warriors",
-            coverImage: "https://via.placeholder.com/300x400",
-            releaseDate: "2023",
-            rating: 4.8,
-            genre: "Sci-fi FPS",
-            platform: "PC, PS5"
-        }
-    ]
+    const [selectedGame, setSelectedGame] = useState<GameSearchResult | null>(null)
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
+    const { data: token } = useQuery({
+        queryKey: ["accessToken"],
+        queryFn: igdbAdapter.getAccessToken,
+        staleTime: 1000 * 60 * 60, // 1 hour
+    })
+
+    const { data: searchResults, isLoading } = useGameSearch({
+        query: searchQuery,
+        token: token || "",
+        enabled: searchQuery.length > 2 && !!token,
+    })
+
+    const handleGameSelect = (game: GameSearchResult) => {
+        setSelectedGame(game)
+        setIsAddModalOpen(true)
+    }
+
+    const handleAddModalClose = () => {
+        setIsAddModalOpen(false)
+        setSelectedGame(null)
+    }
+
+    const handleGameAdded = () => {
+        handleAddModalClose()
+        onClose()
+    }
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Search Games">
-            <div className="space-y-6">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search games..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 py-4 pl-12 pr-4 text-white placeholder-gray-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-lg"
-                    />
-                </div>
+        <>
+            <Modal isOpen={isOpen} onClose={onClose} title="Search Games">
+                <div className="space-y-6">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search games..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full rounded-lg border border-gray-700 bg-gray-800 py-4 pl-12 pr-4 text-white placeholder-gray-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-lg"
+                        />
+                    </div>
 
-                <div className="space-y-4">
-                    {searchResults.map((game) => (
-                        <div
-                            key={game.id}
-                            className="group flex overflow-hidden rounded-xl bg-gray-800 hover:bg-gray-700 transition-all duration-300"
-                        >
-                            <div className="relative w-[180px] flex-shrink-0">
-                                <img
-                                    src={game.coverImage}
-                                    alt={game.title}
-                                    className="h-full w-full object-cover"
-                                />
-                            </div>
-                            <div className="flex-1 p-4">
-                                <h3 className="text-xl font-bold text-white mb-2">{game.title}</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm text-gray-300">{game.genre}</p>
-                                    <p className="text-sm text-gray-400">{game.platform}</p>
-                                    <p className="text-sm text-gray-400">Released: {game.releaseDate}</p>
-                                    <div className="flex items-center space-x-1">
-                                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                        <span className="text-yellow-400 font-semibold">{game.rating}</span>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                        {isLoading ? (
+                            <div className="text-center text-gray-400">Searching...</div>
+                        ) : searchResults && searchResults.length > 0 ? (
+                            searchResults.map((game) => (
+                                <div
+                                    key={game.id}
+                                    className="group flex overflow-hidden rounded-xl bg-gray-800 hover:bg-gray-700 transition-all duration-300"
+                                    onClick={() => handleGameSelect(game)}
+                                >
+                                    <div className="relative w-[180px] flex-shrink-0">
+                                        <img
+                                            src={game.cover?.url || "/placeholder.svg"}
+                                            alt={game.name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="flex-1 p-4">
+                                        <h3 className="text-xl font-bold text-white mb-2">{game.name}</h3>
+                                        <div className="space-y-2">
+                                            {game.genres && (
+                                                <p className="text-sm text-gray-300">
+                                                    {game.genres.map((g) => g.name).join(", ")}
+                                                </p>
+                                            )}
+                                            {game.platforms && (
+                                                <p className="text-sm text-gray-400">
+                                                    {game.platforms.map((p) => p.name).join(", ")}
+                                                </p>
+                                            )}
+                                            {game.first_release_date && (
+                                                <p className="text-sm text-gray-400">
+                                                    {new Date(game.first_release_date * 1000).getFullYear()}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    ))}
+                            ))
+                        ) : searchQuery.length > 2 ? (
+                            <div className="text-center text-gray-400">No games found</div>
+                        ) : null}
+                    </div>
                 </div>
-            </div>
-        </Modal>
+            </Modal>
+
+            {selectedGame && (
+                <AddGameModal
+                    isOpen={isAddModalOpen}
+                    onClose={handleAddModalClose}
+                    onSuccess={handleGameAdded}
+                    game={selectedGame}
+                />
+            )}
+        </>
     )
 }
