@@ -1,22 +1,35 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useMemo } from "react";
 import { X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
+import { GameSearchResult } from "@/utils/types/game";
+import { createClient } from "@/utils/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddGameModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
+  game: GameSearchResult;
 }
 
-export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
-  const [status, setStatus] = useState<string>("");
-  const [rating, setRating] = useState<number>(4.4);
+export default function AddGameModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  game,
+}: AddGameModalProps) {
+  const [status, setStatus] = useState<
+    "Finished" | "Playing" | "Dropped" | "Want"
+  >("Want");
+  const [rating, setRating] = useState<number>(0);
   const [review, setReview] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const getRatingEmoji = useMemo(() => {
     if (rating === 0) return "🤔";
@@ -32,9 +45,49 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
     setRating(value);
   };
 
-  const handleSubmit = () => {
-    // Handle submission
-    onClose();
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      const supabase = createClient();
+
+      // Get the current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
+      // Convert status to database enum format
+      const dbStatus = status.toLowerCase() as
+        | "finished"
+        | "playing"
+        | "dropped"
+        | "want_to_play";
+
+      const { error } = await supabase.from("user_games").insert({
+        user_id: user.id,
+        game_id: game.id,
+        status: dbStatus,
+        rating: Math.round(rating), // Keep rating in 0-10 range
+        review: review,
+        source: "manual",
+        platform_id: game.platforms?.[0]?.id, // Use first platform as default
+      });
+
+      if (error) throw error;
+
+      // Invalidate the userGames query to trigger a refresh
+      queryClient.invalidateQueries({ queryKey: ["userGames"] });
+
+      onSuccess();
+    } catch (error) {
+      console.error("Error adding game:", error);
+      // TODO: Show error toast
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -51,9 +104,9 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
           {/* Game Header */}
           <div className="flex items-center gap-4 mb-8">
             <img
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CleanShot%202025-02-22%20at%2002.38.38@2x-8ID5LGhxOgNtH8b3fOfB123pvhML1s.png"
-              alt="Game cover"
-              className="w-24 h-24 rounded-lg"
+              src={game.cover?.url || "/placeholder.svg"}
+              alt={game.name}
+              className="w-24 h-24 rounded-lg object-cover"
             />
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -62,7 +115,7 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
                   {getRatingEmoji}
                 </span>
               </div>
-              <h2 className="text-2xl font-bold">Cyberline Racing</h2>
+              <h2 className="text-2xl font-bold">{game.name}</h2>
             </div>
           </div>
 
@@ -71,10 +124,12 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
             {["Finished", "Playing", "Dropped", "Want"].map((statusOption) => (
               <button
                 key={statusOption}
-                onClick={() => setStatus(statusOption)}
+                onClick={() => setStatus(statusOption as typeof status)}
                 className={cn(
                   "py-2 px-4 rounded-full border border-quokka-purple/20 text-center",
-                  status === statusOption ? "bg-quokka-purple/10" : "hover:bg-quokka-purple/5"
+                  status === statusOption
+                    ? "bg-quokka-purple/10"
+                    : "hover:bg-quokka-purple/5"
                 )}
               >
                 {statusOption}
@@ -117,9 +172,15 @@ export default function AddGameModal({ isOpen, onClose }: AddGameModalProps) {
           {/* Add Game Button */}
           <button
             onClick={handleSubmit}
-            className="w-full py-4 bg-quokka-cyan text-quokka-dark rounded-full font-semibold hover:bg-quokka-cyan/80 transition-colors"
+            disabled={isSubmitting}
+            className={cn(
+              "w-full py-4 bg-quokka-cyan text-quokka-dark rounded-full font-semibold transition-colors",
+              isSubmitting
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-quokka-cyan/80"
+            )}
           >
-            Add game
+            {isSubmitting ? "Adding game..." : "Add game"}
           </button>
         </div>
       </DialogContent>

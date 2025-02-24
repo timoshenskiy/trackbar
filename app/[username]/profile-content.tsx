@@ -6,81 +6,25 @@ import { Pencil, Trophy, Clock, Star, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { createClient } from "@/utils/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface Game {
   id: number;
   title: string;
-  cover: string;
+  cover?: string;
   genres: string[];
-  year: number;
-  type: string;
-  dateAdded: string;
-  rating: number;
+  platform: string;
   status: "Want" | "Finished" | "Playing" | "Dropped";
-  playtime: number;
+  rating: number;
+  playtime?: number;
   achievements?: {
     completed: number;
     total: number;
   };
-  metacritic?: {
-    score: number;
-    userScore: number;
-  };
-  platform: string;
-  source: "Steam" | "GOG" | "Manual";
+  source: string;
+  dateAdded: string;
 }
-
-const games: Game[] = [
-  {
-    id: 1,
-    title: "Cyberpunk 2077",
-    cover:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CleanShot%202025-02-22%20at%2002.41.58@2x-8LNxRD2sWNuP5Pl3hf5qN4QjS8BMaX.png",
-    genres: ["Shooter", "Role-playing (RPG)", "Adventure"],
-    year: 2020,
-    type: "Main Game",
-    dateAdded: "Feb 20, 2025",
-    rating: 7.9,
-    status: "Want",
-    playtime: 0,
-    achievements: { completed: 0, total: 50 },
-    metacritic: { score: 86, userScore: 7.4 },
-    platform: "PC",
-    source: "Steam",
-  },
-  {
-    id: 2,
-    title: "Nobody Wants to Die",
-    cover:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CleanShot%202025-02-22%20at%2002.41.58@2x-8LNxRD2sWNuP5Pl3hf5qN4QjS8BMaX.png",
-    genres: ["Role-playing (RPG)", "Simulator", "Adventure"],
-    year: 2024,
-    type: "Main Game",
-    dateAdded: "Jul 20, 2024",
-    rating: 8.9,
-    status: "Finished",
-    playtime: 45,
-    achievements: { completed: 35, total: 40 },
-    metacritic: { score: 82, userScore: 8.1 },
-    platform: "PC",
-    source: "GOG",
-  },
-  {
-    id: 3,
-    title: "Cyberpunk Madness",
-    cover:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CleanShot%202025-02-22%20at%2002.41.58@2x-8LNxRD2sWNuP5Pl3hf5qN4QjS8BMaX.png",
-    genres: ["Simulator", "Adventure", "Indie"],
-    year: 2021,
-    type: "Main Game",
-    dateAdded: "Feb 19, 2025",
-    rating: 4.2,
-    status: "Playing",
-    playtime: 12,
-    platform: "PS5",
-    source: "Manual",
-  },
-];
 
 export interface ProfileContentProps {
   isOwnProfile: boolean;
@@ -98,6 +42,80 @@ export function ProfileContent({
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Fetch user's games
+  const { data: games = [], isLoading } = useQuery({
+    queryKey: ["userGames", username],
+    queryFn: async () => {
+      const supabase = createClient();
+
+      // First get the user ID from the username
+      const { data: userData } = await supabase.rpc("get_user_by_username", {
+        p_username: username,
+      });
+
+      if (!userData) {
+        throw new Error("User not found");
+      }
+
+      // Then fetch their games
+      const { data: userGames, error } = await supabase
+        .from("user_games")
+        .select(
+          `
+          *,
+          game:games (
+            id,
+            name,
+            cover:covers (
+              url
+            ),
+            game_to_genres (
+              genres (
+                name
+              )
+            ),
+            game_to_platforms (
+              platforms (
+                name
+              )
+            )
+          )
+        `
+        )
+        .eq("user_id", userData.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      return userGames.map((ug) => ({
+        id: ug.game.id,
+        title: ug.game.name,
+        cover: ug.game.cover?.url,
+        genres: ug.game.game_to_genres?.map((g) => g.genres.name) || [],
+        platform: ug.game.game_to_platforms?.[0]?.platforms.name || "Unknown",
+        status:
+          ug.status === "want_to_play"
+            ? "Want"
+            : ug.status.charAt(0).toUpperCase() + ug.status.slice(1),
+        rating: ug.rating / 10, // Convert from 0-100 to 0-10
+        playtime: Math.round(ug.playtime_minutes / 60),
+        achievements:
+          ug.achievements_total > 0
+            ? {
+                completed: ug.achievements_completed,
+                total: ug.achievements_total,
+              }
+            : undefined,
+        source: ug.source.toUpperCase(),
+        dateAdded: new Date(ug.created_at).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+      }));
+    },
+  });
+
   const getStatusCount = (status: string) => {
     if (status === "All") return games.length;
     return games.filter((game) => game.status === status).length;
@@ -111,10 +129,13 @@ export function ProfileContent({
     { name: "Want", count: getStatusCount("Want"), icon: "⭐" },
   ];
 
-  const totalPlaytime = games.reduce((sum, game) => sum + game.playtime, 0);
+  const totalPlaytime = games.reduce(
+    (sum, game) => sum + (game.playtime || 0),
+    0
+  );
   const completionRate =
     (games.filter((game) => game.status === "Finished").length / games.length) *
-    100;
+      100 || 0;
   const achievementsCompleted = games.reduce(
     (sum, game) => sum + (game.achievements?.completed || 0),
     0
@@ -123,6 +144,10 @@ export function ProfileContent({
     (sum, game) => sum + (game.achievements?.total || 0),
     0
   );
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-gray-400">Loading...</div>;
+  }
 
   return (
     <div className="p-8">
@@ -213,14 +238,19 @@ export function ProfileContent({
           </CardHeader>
           <CardContent>
             <div className="text-sm">
-              <div className="flex justify-between">
-                <span>PC</span>
-                <span>{games.filter((g) => g.platform === "PC").length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>PS5</span>
-                <span>{games.filter((g) => g.platform === "PS5").length}</span>
-              </div>
+              {Array.from(new Set(games.map((g: Game) => g.platform))).map(
+                (platform: string) => (
+                  <div key={platform} className="flex justify-between">
+                    <span>{platform}</span>
+                    <span>
+                      {
+                        games.filter((g: Game) => g.platform === platform)
+                          .length
+                      }
+                    </span>
+                  </div>
+                )
+              )}
             </div>
           </CardContent>
         </Card>
@@ -286,9 +316,6 @@ export function ProfileContent({
                 <div className="text-sm text-gray-400">
                   {game.genres.join(", ")}
                 </div>
-                <div className="text-sm text-gray-400">
-                  {game.year} | {game.type}
-                </div>
                 <div className="flex items-center gap-4 mt-1">
                   <div className="text-sm text-gray-400">{game.dateAdded}</div>
                   {game.achievements && (
@@ -301,26 +328,16 @@ export function ProfileContent({
                       ⏱️ {game.playtime}h
                     </div>
                   )}
-                  {game.source !== "Manual" && (
+                  {game.source !== "MANUAL" && (
                     <div className="text-sm text-gray-400">
-                      {game.source === "Steam" ? "🎮" : "🎯"} {game.source}
+                      {game.source === "STEAM" ? "🎮" : "🎯"} {game.source}
                     </div>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                {game.metacritic && (
-                  <div className="text-sm">
-                    <div className="text-green-500">
-                      {game.metacritic.score}
-                    </div>
-                    <div className="text-blue-500">
-                      {game.metacritic.userScore}
-                    </div>
-                  </div>
-                )}
                 <div className="text-2xl font-bold text-white">
-                  {game.rating}
+                  {game.rating.toFixed(1)}
                 </div>
                 <div
                   className={cn(

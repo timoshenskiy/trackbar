@@ -40,18 +40,53 @@ export const cacheKey = (query: string) => `search:${query.toLowerCase()}`;
 export interface GameSearchResult {
   id: number;
   name: string;
-  cover?: {
-    url: string;
-  };
-  first_release_date?: number;
-  rating?: number;
-  total_rating?: number;
+  slug: string;
   summary?: string;
-  genres?: Array<{ name: string }>;
-  platforms?: Array<{ name: string }>;
-  screenshots?: Array<{ url: string }>;
-  videos?: Array<{ video_id: string }>;
-  involved_companies?: Array<{ company: { name: string } }>;
+  storyline?: string;
+  created_at: number;
+  first_release_date?: number;
+  total_rating?: number;
+  url?: string;
+  cover?: {
+    id: number;
+    url: string;
+    width: number;
+    height: number;
+  };
+  screenshots?: Array<{
+    id: number;
+    url: string;
+    width: number;
+    height: number;
+  }>;
+  websites?: Array<{
+    id: number;
+    type: string;
+    url: string;
+    trusted: boolean;
+  }>;
+  involved_companies?: string;
+  keywords?: string;
+  game_modes?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
+  genres?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
+  platforms?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
+  similar_games?: number[];
+  game_types?: Array<{
+    id: number;
+    type: string;
+  }>;
 }
 
 export const setGameSearchCache = async (
