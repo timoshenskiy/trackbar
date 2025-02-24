@@ -15,12 +15,14 @@ export interface GamePlatform {
 }
 
 export interface GameScreenshot {
+  id: number;
   url: string;
   width: number;
   height: number;
 }
 
 export interface GameWebsite {
+  id: number;
   type: {
     id: number | null;
     type: string;
@@ -31,44 +33,89 @@ export interface GameWebsite {
 
 export interface GameCompany {
   company: {
+    id: number;
     name: string;
     slug: string;
   };
 }
 
+export interface GameMode {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface GameKeyword {
+  id: number;
+  name: string;
+}
+
 // Extended database type for games table with its relationships
 export type DBGame = Tables["games"]["Row"] & {
-  game_to_genres?: Array<{ genres: Tables["genres"]["Row"] }> | null;
-  game_to_platforms?: Array<{ platforms: Tables["platforms"]["Row"] }> | null;
-  game_screenshots?: Tables["game_screenshots"]["Row"][] | null;
-  game_websites?: Tables["game_websites"]["Row"][] | null;
-  game_modes?: Tables["game_modes"]["Row"][] | null;
-  game_companies?: Tables["game_companies"]["Row"][] | null;
-  keywords?: Array<{ name: string }> | null;
-  similar_games?: number[] | null;
+  id: number;
+  name: string;
+  slug: string;
+  summary: string | null;
+  storyline: string | null;
+  first_release_date: string | null;
+  created_at: string | null;
+  total_rating: number | null;
+  url: string | null;
+  covers?: {
+    id: number;
+    url: string;
+    width: number | null;
+    height: number | null;
+  };
+  involved_companies: string | null;
+  keywords: string | null;
+  similar_games: number[] | null;
+  game_type_id: number | null;
+  updated_at: string | null;
+  game_to_genres?: Array<{ genres: GameGenre }>;
+  game_to_platforms?: Array<{ platforms: GamePlatform }>;
+  game_to_modes?: Array<{ game_modes: GameMode }>;
+  game_to_types?: Array<{ types: { id: number; type: string } }>;
+  screenshots?: GameScreenshot[];
+  websites?: GameWebsite[];
+  involved_companies_rel?: Array<{
+    company: {
+      id: number;
+      name: string;
+      slug: string;
+    };
+  }>;
+  keywords_rel?: Array<{ keywords: GameKeyword }>;
+  type_id: number | null;
+  type: string | null;
 };
 
 export interface GameSearchResult {
   id: number;
   name: string;
   slug: string;
-  created_at: string | null;
-  genres?: GameGenre[];
-  platforms?: GamePlatform[];
+  summary?: string;
+  storyline?: string;
+  created_at: number;
   first_release_date?: number;
-  keywords?: Array<{ name: string }>;
+  total_rating?: number;
+  url?: string;
   cover?: {
+    id: number;
     url: string;
     width: number;
     height: number;
   };
   screenshots?: GameScreenshot[];
   websites?: GameWebsite[];
-  game_modes?: Array<{ name: string; slug: string }>;
-  total_rating?: number;
+  involved_companies?: string;
+  keywords?: string;
+  game_modes?: GameMode[];
+  genres?: GameGenre[];
+  platforms?: GamePlatform[];
   similar_games?: number[];
-  storyline?: string;
-  summary?: string;
-  url?: string;
-  involved_companies?: GameCompany[];
+  game_types?: Array<{
+    id: number;
+    type: string;
+  }>;
 }

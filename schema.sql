@@ -17,7 +17,7 @@ CREATE TABLE game_modes (
     slug TEXT NOT NULL
 );
 
-CREATE TABLE game_types (
+CREATE TABLE types (
     id BIGINT PRIMARY KEY,
     type TEXT NOT NULL
 );
@@ -38,7 +38,7 @@ CREATE TABLE games (
     created_at TIMESTAMP DEFAULT now(),
     total_rating DECIMAL(5,2),
     url TEXT,
-    game_type_id BIGINT REFERENCES game_types(id),
+    type_id BIGINT REFERENCES types(id),
     cover_url TEXT,
     cover_width INTEGER,
     cover_height INTEGER,
@@ -206,7 +206,7 @@ CREATE POLICY "Reference tables are publicly readable" ON genres
 CREATE POLICY "Reference tables are publicly readable" ON game_modes
     FOR SELECT USING (true);
 
-CREATE POLICY "Reference tables are publicly readable" ON game_types
+CREATE POLICY "Reference tables are publicly readable" ON types
     FOR SELECT USING (true);
 
 CREATE POLICY "Reference tables are publicly readable" ON website_types
