@@ -18,12 +18,12 @@ const Sidebar = async () => {
     { name: "Home", href: "/", icon: Home },
     ...(user
       ? [
-          {
-            name: "My Games",
-            href: `/${user.user_metadata.username}`,
-            icon: Gamepad2,
-          },
-        ]
+        {
+          name: "My Games",
+          href: `/${user.user_metadata.username}`,
+          icon: Gamepad2,
+        },
+      ]
       : []),
     // { name: "Community", href: "/community", icon: Users },
     // { name: "Notifications", href: "/notifications", icon: Bell },
@@ -35,46 +35,12 @@ const Sidebar = async () => {
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8">
         <div className="w-12 h-12 rounded-full bg-quokka-cyan flex items-center justify-center">
-          <Logo size={200}/>
+          <Logo size={50} />
         </div>
         <span className="text-quokka-light font-bold text-xl">QUOKKA</span>
         <span className="text-xs text-quokka-light/40">beta</span>
       </div>
-
-      {/* User Profile */}
-      {user ? (
-        <div className="flex items-center gap-3 mb-6">
-          {user.user_metadata?.avatar_url ? (
-            <img
-              src={user.user_metadata.avatar_url}
-              alt={`${user.user_metadata.username}'s avatar`}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
-              {user.user_metadata.username?.[0].toUpperCase() ?? "U"}
-            </div>
-          )}
-
-          <div>
-            <div className="font-medium">
-              {user.user_metadata.full_name || user.user_metadata.username}
-            </div>
-            <div className="text-sm text-gray-400">
-              @{user.user_metadata.username}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <Button asChild size="sm" variant={"outline"}>
-            <Link href="/auth">Sign in</Link>
-          </Button>
-        </div>
-      )}
-
       <SidebarSearch />
-
       <nav className="space-y-1 flex-1">
         {navigation.map((item) => (
           <Link

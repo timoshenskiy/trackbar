@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 import { ProfileContent } from "./profile-content";
+import Sidebar from "@/components/Sidebar";
 
 export default async function UserProfilePage({
   params,
@@ -29,11 +30,16 @@ export default async function UserProfilePage({
   const isOwnProfile = currentUser?.user_metadata?.username === params.username;
 
   return (
-    <ProfileContent
-      isOwnProfile={isOwnProfile}
-      username={userData.username}
-      fullName={userData.full_name}
-      avatarUrl={userData.avatar_url}
-    />
+    <div className="mx-auto max-w-[1440px]">
+      <div className="flex">
+        <Sidebar />
+        <ProfileContent
+          isOwnProfile={isOwnProfile}
+          username={userData.username}
+          fullName={userData.full_name}
+          avatarUrl={userData.avatar_url}
+        />
+      </div>
+    </div>
   );
 }
