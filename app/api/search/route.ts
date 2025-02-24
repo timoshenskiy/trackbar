@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 import { getGameSearchCache, setGameSearchCache } from "@/utils/redis";
 import { searchPostgres } from "@/utils/search/postgres";
 import { searchIGDB } from "@/utils/search/igdb";
-import { storeIGDBResults } from "@/utils/search/store";
+import { createClient } from "@/utils/supabase/server";
 import { deduplicateGames } from "@/utils/search/utils";
 
 export async function GET(request: Request) {
@@ -63,14 +63,27 @@ export async function GET(request: Request) {
     // Step 4: Cache the results
     await setGameSearchCache(query, allResults);
 
-    // Step 5: Store IGDB results in PostgreSQL (background task)
+    // Step 5: Store IGDB results in PostgreSQL using PGMQ
     if (igdbResults.length > 0) {
-      // This should be moved to a background job in production
-      // Ideally it should be a queue system
-      // TODO: Implement background job
-      storeIGDBResults(igdbResults).catch((error) => {
-        console.error("Error storing IGDB results:", error);
-      });
+      const supabase = await createClient();
+      let enqueuedCount = 0;
+
+      // Send each game to the queue
+      for (const game of igdbResults) {
+        const { data: msgId, error } = await supabase.rpc("enqueue_game", {
+          p_queue_name: "game_store_queue",
+          p_message: game,
+        });
+
+        if (error) {
+          console.error("Error enqueueing game:", error);
+        } else if (msgId) {
+          // Only increment if message was actually enqueued (not a duplicate)
+          enqueuedCount++;
+        }
+      }
+
+      console.log(`Enqueued ${enqueuedCount} new games for processing`);
     }
 
     return NextResponse.json(allResults);
