@@ -17,15 +17,60 @@ export const searchPostgres = async (
       `
       *,
       game_to_genres (
-        genres (*)
+        genres (
+          id,
+          name,
+          slug
+        )
       ),
       game_to_platforms (
-        platforms (*)
+        platforms (
+          id,
+          name,
+          slug
+        )
       ),
-      game_screenshots (*),
-      game_websites (*),
-      game_modes (*),
-      game_companies (*)
+      game_to_modes (
+        game_modes (
+          id,
+          name,
+          slug
+        )
+      ),
+      game_to_types (
+        types (
+          id,
+          type
+        )
+      ),
+      screenshots (
+        id,
+        url,
+        width,
+        height
+      ),
+      websites (
+        id,
+        url,
+        trusted,
+        type: website_types (
+          id,
+          type
+        )
+      ),
+      involved_companies_rel: game_to_companies (
+        companies (
+          id,
+          name,
+          slug
+        )
+      ),
+      keywords_rel: game_to_keywords (
+        keywords (
+          id,
+          name
+        )
+      )
     `
     )
     .ilike("name", `%${query}%`)
@@ -46,59 +91,64 @@ export const searchPostgres = async (
           id: game.id,
           name: game.name,
           slug: game.slug,
-          created_at: game.created_at,
-          genres:
-            game.game_to_genres?.map((g) => ({
-              id: g.genres.id,
-              name: g.genres.name,
-              slug: g.genres.slug,
-            })) || undefined,
-          platforms:
-            game.game_to_platforms?.map((p) => ({
-              id: p.platforms.id,
-              name: p.platforms.name,
-              slug: p.platforms.slug,
-            })) || undefined,
+          created_at: Number(game.created_at) || 0,
           first_release_date: game.first_release_date
-            ? Math.floor(new Date(game.first_release_date).getTime() / 1000)
+            ? Number(game.first_release_date)
             : undefined,
-          keywords: game.keywords?.map((k) => ({ name: k.name })) || undefined,
+          summary: game.summary || undefined,
+          storyline: game.storyline || undefined,
+          total_rating: game.total_rating || undefined,
+          url: game.url || undefined,
           cover: game.cover_url
             ? {
+                id: Number(game.cover_id),
                 url: game.cover_url,
                 width: game.cover_width || 0,
                 height: game.cover_height || 0,
               }
             : undefined,
-          screenshots:
-            game.game_screenshots?.map((s) => ({
-              url: s.url,
-              width: s.width || 0,
-              height: s.height || 0,
-            })) || undefined,
-          websites:
-            game.game_websites?.map((w) => ({
-              type: { id: w.website_type_id, type: "website" },
-              url: w.url,
-              trusted: w.trusted,
-            })) || undefined,
-          game_modes:
-            game.game_modes?.map((m) => ({
-              name: m.name,
-              slug: m.slug,
-            })) || undefined,
-          total_rating: game.total_rating || undefined,
+          screenshots: game.screenshots?.map((s) => ({
+            id: s.id,
+            url: s.url,
+            width: s.width || 0,
+            height: s.height || 0,
+          })),
+          websites: game.websites?.map((w) => ({
+            id: w.id,
+            type: w.type,
+            url: w.url,
+            trusted: w.trusted,
+          })),
+          game_modes: game.game_to_modes?.map((m) => ({
+            id: m.game_modes.id,
+            name: m.game_modes.name,
+            slug: m.game_modes.slug,
+          })),
+          genres: game.game_to_genres?.map((g) => ({
+            id: g.genres.id,
+            name: g.genres.name,
+            slug: g.genres.slug,
+          })),
+          platforms: game.game_to_platforms?.map((p) => ({
+            id: p.platforms.id,
+            name: p.platforms.name,
+            slug: p.platforms.slug,
+          })),
+          involved_companies: game.involved_companies
+            ? JSON.parse(game.involved_companies)
+                .map((ic: any) => ic.company.name)
+                .join(", ")
+            : undefined,
+          keywords: game.keywords
+            ? JSON.parse(game.keywords)
+                .map((k: any) => k.name)
+                .join(", ")
+            : undefined,
           similar_games: game.similar_games || undefined,
-          storyline: game.storyline || undefined,
-          summary: game.summary || undefined,
-          url: game.url || undefined,
-          involved_companies:
-            game.game_companies?.map((c) => ({
-              company: {
-                name: c.company_name,
-                slug: c.company_slug,
-              },
-            })) || undefined,
+          game_types: game.game_to_types?.map((t) => ({
+            id: t.types.id,
+            type: t.types.type,
+          })),
         };
       } catch (error) {
         console.error(`Error transforming game ${game.id}:`, error);

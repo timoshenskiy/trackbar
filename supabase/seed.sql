@@ -264,8 +264,8 @@ INSERT INTO game_modes (id, name, slug) VALUES
 -- Add ON CONFLICT DO NOTHING to handle any duplicates gracefully
 -- ON CONFLICT (id) DO NOTHING; 
 
--- Seed data for game types
-INSERT INTO game_types (id, type) VALUES
+-- Seed data for types
+INSERT INTO types (id, type) VALUES
 (0, 'Main Game'),
 (1, 'DLC Addon'),
 (2, 'Expansion'),

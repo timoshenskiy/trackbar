@@ -34,54 +34,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      game_companies: {
-        Row: {
-          company_id: number
-          company_name: string
-          company_slug: string
-          game_id: number
-        }
-        Insert: {
-          company_id: number
-          company_name: string
-          company_slug: string
-          game_id: number
-        }
-        Update: {
-          company_id?: number
-          company_name?: string
-          company_slug?: string
-          game_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "game_companies_game_id_fkey"
-            columns: ["game_id"]
-            isOneToOne: false
-            referencedRelation: "games"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      game_modes: {
-        Row: {
-          id: number
-          name: string
-          slug: string
-        }
-        Insert: {
-          id: number
-          name: string
-          slug: string
-        }
-        Update: {
-          id?: number
-          name?: string
-          slug?: string
-        }
-        Relationships: []
-      }
-      game_screenshots: {
+      covers: {
         Row: {
           game_id: number | null
           height: number | null
@@ -105,13 +58,31 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "game_screenshots_game_id_fkey"
+            foreignKeyName: "covers_game_id_fkey"
             columns: ["game_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "games"
             referencedColumns: ["id"]
           },
         ]
+      }
+      game_modes: {
+        Row: {
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          id: number
+          name: string
+          slug: string
+        }
+        Update: {
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
       }
       game_to_genres: {
         Row: {
@@ -146,15 +117,15 @@ export type Database = {
       game_to_modes: {
         Row: {
           game_id: number
-          game_mode_id: number
+          mode_id: number
         }
         Insert: {
           game_id: number
-          game_mode_id: number
+          mode_id: number
         }
         Update: {
           game_id?: number
-          game_mode_id?: number
+          mode_id?: number
         }
         Relationships: [
           {
@@ -165,8 +136,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "game_to_modes_game_mode_id_fkey"
-            columns: ["game_mode_id"]
+            foreignKeyName: "game_to_modes_mode_id_fkey"
+            columns: ["mode_id"]
             isOneToOne: false
             referencedRelation: "game_modes"
             referencedColumns: ["id"]
@@ -203,121 +174,83 @@ export type Database = {
           },
         ]
       }
-      game_types: {
+      game_to_types: {
         Row: {
-          id: number
-          type: string
+          game_id: number
+          type_id: number
         }
         Insert: {
-          id: number
-          type: string
+          game_id: number
+          type_id: number
         }
         Update: {
-          id?: number
-          type?: string
-        }
-        Relationships: []
-      }
-      game_websites: {
-        Row: {
-          game_id: number | null
-          id: number
-          trusted: boolean | null
-          url: string
-          website_type_id: number | null
-        }
-        Insert: {
-          game_id?: number | null
-          id: number
-          trusted?: boolean | null
-          url: string
-          website_type_id?: number | null
-        }
-        Update: {
-          game_id?: number | null
-          id?: number
-          trusted?: boolean | null
-          url?: string
-          website_type_id?: number | null
+          game_id?: number
+          type_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "game_websites_game_id_fkey"
+            foreignKeyName: "game_to_types_game_id_fkey"
             columns: ["game_id"]
             isOneToOne: false
             referencedRelation: "games"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "game_websites_website_type_id_fkey"
-            columns: ["website_type_id"]
+            foreignKeyName: "game_to_types_type_id_fkey"
+            columns: ["type_id"]
             isOneToOne: false
-            referencedRelation: "website_types"
+            referencedRelation: "types"
             referencedColumns: ["id"]
           },
         ]
       }
       games: {
         Row: {
-          cover_height: number | null
-          cover_url: string | null
-          cover_width: number | null
-          created_at: string | null
-          first_release_date: string | null
-          game_type_id: number | null
+          created_at: number | null
+          first_release_date: number | null
           id: number
+          involved_companies: string | null
           is_popular: boolean | null
+          keywords: string | null
           name: string
+          similar_games: number[] | null
           slug: string
           storyline: string | null
           summary: string | null
           total_rating: number | null
           updated_at: string | null
-          url: string | null
         }
         Insert: {
-          cover_height?: number | null
-          cover_url?: string | null
-          cover_width?: number | null
-          created_at?: string | null
-          first_release_date?: string | null
-          game_type_id?: number | null
+          created_at?: number | null
+          first_release_date?: number | null
           id: number
+          involved_companies?: string | null
           is_popular?: boolean | null
+          keywords?: string | null
           name: string
+          similar_games?: number[] | null
           slug: string
           storyline?: string | null
           summary?: string | null
           total_rating?: number | null
           updated_at?: string | null
-          url?: string | null
         }
         Update: {
-          cover_height?: number | null
-          cover_url?: string | null
-          cover_width?: number | null
-          created_at?: string | null
-          first_release_date?: string | null
-          game_type_id?: number | null
+          created_at?: number | null
+          first_release_date?: number | null
           id?: number
+          involved_companies?: string | null
           is_popular?: boolean | null
+          keywords?: string | null
           name?: string
+          similar_games?: number[] | null
           slug?: string
           storyline?: string | null
           summary?: string | null
           total_rating?: number | null
           updated_at?: string | null
-          url?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "games_game_type_id_fkey"
-            columns: ["game_type_id"]
-            isOneToOne: false
-            referencedRelation: "game_types"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       genres: {
         Row: {
@@ -409,35 +342,52 @@ export type Database = {
         }
         Relationships: []
       }
-      similar_games: {
+      screenshots: {
         Row: {
-          game_id: number
-          similar_game_id: number
+          game_id: number | null
+          height: number | null
+          id: number
+          url: string
+          width: number | null
         }
         Insert: {
-          game_id: number
-          similar_game_id: number
+          game_id?: number | null
+          height?: number | null
+          id: number
+          url: string
+          width?: number | null
         }
         Update: {
-          game_id?: number
-          similar_game_id?: number
+          game_id?: number | null
+          height?: number | null
+          id?: number
+          url?: string
+          width?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "similar_games_game_id_fkey"
+            foreignKeyName: "screenshots_game_id_fkey"
             columns: ["game_id"]
             isOneToOne: false
             referencedRelation: "games"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "similar_games_similar_game_id_fkey"
-            columns: ["similar_game_id"]
-            isOneToOne: false
-            referencedRelation: "games"
-            referencedColumns: ["id"]
-          },
         ]
+      }
+      types: {
+        Row: {
+          id: number
+          type: string
+        }
+        Insert: {
+          id: number
+          type: string
+        }
+        Update: {
+          id?: number
+          type?: string
+        }
+        Relationships: []
       }
       user_games: {
         Row: {
@@ -549,6 +499,45 @@ export type Database = {
           type?: string
         }
         Relationships: []
+      }
+      websites: {
+        Row: {
+          game_id: number | null
+          id: number
+          trusted: boolean | null
+          type_id: number | null
+          url: string
+        }
+        Insert: {
+          game_id?: number | null
+          id: number
+          trusted?: boolean | null
+          type_id?: number | null
+          url: string
+        }
+        Update: {
+          game_id?: number | null
+          id?: number
+          trusted?: boolean | null
+          type_id?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "websites_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "websites_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "website_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

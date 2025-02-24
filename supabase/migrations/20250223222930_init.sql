@@ -17,7 +17,7 @@ CREATE TABLE game_modes (
     slug TEXT NOT NULL
 );
 
-CREATE TABLE game_types (
+CREATE TABLE types (
     id BIGINT PRIMARY KEY,
     type TEXT NOT NULL
 );
@@ -34,77 +34,71 @@ CREATE TABLE games (
     slug TEXT NOT NULL,
     summary TEXT,
     storyline TEXT,
-    first_release_date TIMESTAMP,
-    created_at TIMESTAMP DEFAULT now(),
+    first_release_date BIGINT,
+    created_at BIGINT,
     total_rating DECIMAL(5,2),
-    url TEXT,
-    game_type_id BIGINT REFERENCES game_types(id),
-    cover_url TEXT,
-    cover_width INTEGER,
-    cover_height INTEGER,
+    involved_companies TEXT,
+    keywords TEXT,
+    similar_games BIGINT[],
     updated_at TIMESTAMP DEFAULT now()
 );
 
--- Game relationships and metadata
-CREATE TABLE game_to_platforms (
-    game_id BIGINT REFERENCES games(id),
-    platform_id BIGINT REFERENCES platforms(id),
-    PRIMARY KEY (game_id, platform_id)
-);
-
-CREATE TABLE game_to_genres (
-    game_id BIGINT REFERENCES games(id),
-    genre_id BIGINT REFERENCES genres(id),
-    PRIMARY KEY (game_id, genre_id)
-);
-
-CREATE TABLE game_to_modes (
-    game_id BIGINT REFERENCES games(id),
-    game_mode_id BIGINT REFERENCES game_modes(id),
-    PRIMARY KEY (game_id, game_mode_id)
-);
-
-CREATE TABLE game_websites (
+-- Covers table (one-to-one with games)
+CREATE TABLE covers (
     id BIGINT PRIMARY KEY,
-    game_id BIGINT REFERENCES games(id),
-    url TEXT NOT NULL,
-    trusted BOOLEAN DEFAULT false,
-    website_type_id BIGINT REFERENCES website_types(id)
-);
-
-CREATE TABLE game_companies (
-    game_id BIGINT REFERENCES games(id),
-    company_id BIGINT,
-    company_name TEXT NOT NULL,
-    company_slug TEXT NOT NULL,
-    PRIMARY KEY (game_id, company_id)
-);
-
-CREATE TABLE game_screenshots (
-    id BIGINT PRIMARY KEY,
-    game_id BIGINT REFERENCES games(id),
+    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE UNIQUE,
     url TEXT NOT NULL,
     width INTEGER,
     height INTEGER
 );
 
-CREATE TABLE similar_games (
-    game_id BIGINT REFERENCES games(id),
-    similar_game_id BIGINT REFERENCES games(id),
-    PRIMARY KEY (game_id, similar_game_id)
+-- Screenshots table (many-to-one with games)
+CREATE TABLE screenshots (
+    id BIGINT PRIMARY KEY,
+    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    width INTEGER,
+    height INTEGER
+);
+
+-- Websites table (many-to-one with games)
+CREATE TABLE websites (
+    id BIGINT PRIMARY KEY,
+    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    trusted BOOLEAN,
+    type_id BIGINT REFERENCES website_types(id)
+);
+
+-- Game to platforms table (many-to-many with games and platforms)
+CREATE TABLE game_to_platforms (
+    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE,
+    platform_id BIGINT REFERENCES platforms(id) ON DELETE CASCADE,
+    PRIMARY KEY (game_id, platform_id)
+);
+
+-- Game to genres table (many-to-many with games and genres)
+CREATE TABLE game_to_genres (
+    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE,
+    genre_id BIGINT REFERENCES genres(id) ON DELETE CASCADE,
+    PRIMARY KEY (game_id, genre_id)
+);
+
+-- Game to modes table (many-to-many with games and modes)
+CREATE TABLE game_to_modes (
+    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE,
+    mode_id BIGINT REFERENCES game_modes(id) ON DELETE CASCADE,
+    PRIMARY KEY (game_id, mode_id)
+);
+
+-- Game to types table (many-to-many with games and types)
+CREATE TABLE game_to_types (
+    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE,
+    type_id BIGINT REFERENCES types(id) ON DELETE CASCADE,
+    PRIMARY KEY (game_id, type_id)
 );
 
 -- Custom tables based on diagram-flow.md
-CREATE TABLE profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id),
-    full_name TEXT,
-    handle TEXT UNIQUE,
-    bio TEXT,
-    avatar_url TEXT,
-    created_at TIMESTAMP DEFAULT now(),
-    updated_at TIMESTAMP DEFAULT now()
-);
-
 CREATE TYPE game_status AS ENUM (
     'finished',
     'playing',
@@ -159,34 +153,23 @@ CREATE TABLE ignored_platform_games (
     UNIQUE(user_id, platform_name, platform_game_id)
 );
 
--- Storage policies for game-images bucket
--- Note: You'll need to create the storage bucket 'game-images' in Supabase dashboard
--- and configure it with the following structure:
--- game-images/
---   ├── {game_id}/
---   │   ├── screenshots/
---   │   └── cover/
-
 -- Indexes for better query performance
 CREATE INDEX idx_games_name ON games(name);
 CREATE INDEX idx_games_slug ON games(slug);
+CREATE INDEX idx_websites_game_id ON websites(game_id);
 CREATE INDEX idx_user_games_user_id ON user_games(user_id);
 CREATE INDEX idx_user_games_status ON user_games(status);
 CREATE INDEX idx_user_games_game_id ON user_games(game_id);
 CREATE INDEX idx_game_to_platforms_game_id ON game_to_platforms(game_id);
 CREATE INDEX idx_game_to_genres_game_id ON game_to_genres(game_id);
-CREATE INDEX idx_game_screenshots_game_id ON game_screenshots(game_id);
+CREATE INDEX idx_screenshots_game_id ON screenshots(game_id);
 
 -- Row Level Security (RLS) policies
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_games ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_platform_connections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ignored_platform_games ENABLE ROW LEVEL SECURITY;
 
 -- Users can only read/write their own data
-CREATE POLICY "Users can manage their own profile" ON profiles
-    FOR ALL USING (auth.uid() = id);
-
 CREATE POLICY "Users can manage their own games" ON user_games
     FOR ALL USING (auth.uid() = user_id);
 
@@ -206,7 +189,7 @@ CREATE POLICY "Reference tables are publicly readable" ON genres
 CREATE POLICY "Reference tables are publicly readable" ON game_modes
     FOR SELECT USING (true);
 
-CREATE POLICY "Reference tables are publicly readable" ON game_types
+CREATE POLICY "Reference tables are publicly readable" ON types
     FOR SELECT USING (true);
 
 CREATE POLICY "Reference tables are publicly readable" ON website_types
@@ -216,40 +199,53 @@ CREATE POLICY "Reference tables are publicly readable" ON website_types
 CREATE POLICY "Games are publicly readable" ON games
     FOR SELECT USING (true);
 
+CREATE POLICY "Games can be inserted from IGDB" ON games
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Games can be updated from IGDB" ON games
+    FOR UPDATE USING (true);
+
 CREATE POLICY "Game platforms are publicly readable" ON game_to_platforms
     FOR SELECT USING (true);
+
+CREATE POLICY "Game platforms can be inserted" ON game_to_platforms
+    FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Game genres are publicly readable" ON game_to_genres
     FOR SELECT USING (true);
 
+CREATE POLICY "Game genres can be inserted" ON game_to_genres
+    FOR INSERT WITH CHECK (true);
+
 CREATE POLICY "Game modes are publicly readable" ON game_to_modes
     FOR SELECT USING (true);
 
-CREATE POLICY "Game websites are publicly readable" ON game_websites
+CREATE POLICY "Game modes can be inserted" ON game_to_modes
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Game types are publicly readable" ON game_to_types
     FOR SELECT USING (true);
 
-CREATE POLICY "Game companies are publicly readable" ON game_companies
+CREATE POLICY "Game types can be inserted" ON game_to_types
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Game websites are publicly readable" ON websites
     FOR SELECT USING (true);
 
-CREATE POLICY "Game screenshots are publicly readable" ON game_screenshots
+CREATE POLICY "Game websites can be inserted" ON websites
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Game websites can be updated" ON websites
+    FOR UPDATE USING (true);
+
+CREATE POLICY "Screenshots are publicly readable" ON screenshots
     FOR SELECT USING (true);
 
-CREATE POLICY "Similar games are publicly readable" ON similar_games
-    FOR SELECT USING (true);
+CREATE POLICY "Screenshots can be inserted" ON screenshots
+    FOR INSERT WITH CHECK (true);
 
--- Trigger to create profile after user signs up
-CREATE OR REPLACE FUNCTION public.handle_new_user() 
-RETURNS trigger AS $$
-BEGIN
-  INSERT INTO public.profiles (id)
-  VALUES (new.id);
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+CREATE POLICY "Screenshots can be updated" ON screenshots
+    FOR UPDATE USING (true);
 
 -- Create storage buckets
 INSERT INTO storage.buckets (id, name, public) 
@@ -320,6 +316,10 @@ USING (
   auth.uid() IS NOT NULL
 );
 
+-- Enable RLS
+ALTER TABLE games ENABLE ROW LEVEL SECURITY;
+ALTER TABLE websites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE screenshots ENABLE ROW LEVEL SECURITY;
 
 -- Create the function
 create or replace function public.get_user_by_username(p_username text)
@@ -346,4 +346,4 @@ begin
   -- Return the result (will be null if no user found)
   return v_result;
 end;
-$$; 
+$$;
