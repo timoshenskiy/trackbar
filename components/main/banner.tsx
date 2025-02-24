@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/ui/logo"
+import Loader from "../ui/loader"
+import { useState } from "react"
 
 interface BannerProps {
     title?: string
@@ -18,7 +20,7 @@ function Banner({
         <div className="absolute inset-0 bg-cover bg-center opacity-10"></div>
         <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
           <div className="mb-8">
-            <Logo size={400} loading/>
+            <Logo size={400} animateBorder/>
           </div>
           <h1 className="mb-4 text-7xl font-bold tracking-wide text-quokka-cyan">{title}</h1>
           <p className="mb-8 max-w-2xl text-xl font-semibold text-quokka-light">{description}</p>

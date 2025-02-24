@@ -36,7 +36,7 @@ export default function RootLayout({
           >
             <GameProvider>
               <div className="flex min-h-screen bg-quokka-darker max-w-[100vw] overflow-x-hidden">
-                <Sidebar />
+                {/* <Sidebar /> */}
                 <main className="flex-1 max-w-[100%] overflow-x-hidden">
                   {children}
                 </main>

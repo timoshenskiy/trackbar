@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { AuthForm } from "./auth-form";
 import type { Message } from "@/components/form-message";
+import Footer from "@/components/main/footer";
 
 export default async function AuthPage({
   searchParams,
@@ -18,5 +19,5 @@ export default async function AuthPage({
     redirect(`/${user.user_metadata.username}`);
   }
 
-  return <AuthForm searchParams={searchParams} />;
+  return <div><AuthForm searchParams={searchParams} /><Footer /></div>;
 }

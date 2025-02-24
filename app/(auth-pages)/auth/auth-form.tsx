@@ -9,7 +9,9 @@ import { FormMessage, type Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Logo } from "@/components/ui/logo";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { useState } from "react";
 import { SmtpMessage } from "../smtp-message";
 
@@ -44,8 +46,8 @@ export function AuthForm({ searchParams }: { searchParams: Message }) {
   }
 
   return (
-    <div>
-      <div className="flex-1 flex items-center justify-center p-4">
+    <div className="min-h-screen w-[100vw] flex items-center justify-center bg-quokka-light dark:bg-quokka-dark">
+      <div className="flex-1 flex flex-col max-w-[500px] items-center justify-center p-4 gap-4">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={mode}
@@ -58,16 +60,20 @@ export function AuthForm({ searchParams }: { searchParams: Message }) {
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 },
             }}
+            className="w-full max-w-4xl bg-background/80 backdrop-blur-xl p-8 rounded-xl shadow-lg border border-quokka-purple/20"
           >
+            <Link href="/" className="mb-4">
+              <Logo size={100} />
+            </Link>
             {mode === "signin" && (
-              <form className="flex-1 flex flex-col min-w-64">
-                <h1 className="text-2xl font-medium">Sign in</h1>
-                <p className="text-sm text-foreground">
+              <form className="flex-1 flex flex-col w-full">
+                <h1 className="text-3xl font-bold text-quokka-purple mb-2">Sign in</h1>
+                <p className="text-sm text-foreground/80 mb-8">
                   Don't have an account?{" "}
                   <button
                     type="button"
                     onClick={() => setMode("signup")}
-                    className="text-primary font-medium underline"
+                    className="text-quokka-purple font-medium hover:text-quokka-cyan transition-colors"
                   >
                     Sign up
                   </button>
@@ -90,10 +96,12 @@ export function AuthForm({ searchParams }: { searchParams: Message }) {
                     name="password"
                     placeholder="Your password"
                     required
+                    className="border-quokka-purple/20 focus:border-quokka-purple"
                   />
                   <SubmitButton
                     pendingText="Signing In..."
                     formAction={signInAction}
+                    className="bg-quokka-purple hover:bg-quokka-purple/90 text-white transition-colors"
                   >
                     Sign in
                   </SubmitButton>
@@ -103,14 +111,14 @@ export function AuthForm({ searchParams }: { searchParams: Message }) {
             )}
 
             {mode === "signup" && (
-              <form className="flex flex-col min-w-64">
-                <h1 className="text-2xl font-medium">Sign up</h1>
-                <p className="text-sm text-foreground">
+              <form className="flex-1 flex flex-col w-full">
+                <h1 className="text-3xl font-bold text-quokka-purple mb-2">Sign up</h1>
+                <p className="text-sm text-foreground/80 mb-8">
                   Already have an account?{" "}
                   <button
                     type="button"
                     onClick={() => setMode("signin")}
-                    className="text-primary font-medium underline"
+                    className="text-quokka-purple font-medium hover:text-quokka-cyan transition-colors"
                   >
                     Sign in
                   </button>
@@ -174,8 +182,8 @@ export function AuthForm({ searchParams }: { searchParams: Message }) {
             )}
           </motion.div>
         </AnimatePresence>
+        <SmtpMessage />
       </div>
-      <SmtpMessage />
     </div>
   );
 }
