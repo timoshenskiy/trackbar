@@ -9,7 +9,10 @@
     "lint": "next lint",
     "supabase:generate_types": "supabase gen types typescript --local > types_db.ts",
     "supabase:migrate": "supabase db push",
-    "supabase:studio": "supabase studio"
+    "supabase:studio": "supabase studio",
+    "supabase:reset": "supabase db reset",
+    "redis:reset": "env $(grep -v '^#' .env.local | xargs) bash -c 'redis-cli -h $(echo $REDIS_URL | cut -d ':' -f 1) -p $(echo $REDIS_URL | cut -d ':' -f 2) -a $REDIS_PASSWORD FLUSHALL'",
+    "db:reset": "npm run supabase:reset && npm run redis:reset"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
