@@ -1,20 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-
-interface GameData {
-  name: string;
-  summary?: string;
-  storyline?: string;
-  cover?: { url: string };
-  genres?: { name: string }[];
-  platforms?: { name: string }[];
-  release_dates?: { human: string }[];
-  age_ratings?: { rating: number; category: number }[];
-  involved_companies?: {
-    company: { name: string };
-    developer: boolean;
-    publisher: boolean;
-  }[];
-}
+import { IgdbGames } from "./types";
 
 const clientId = process.env.TWITCH_CLIENT_ID;
 const accessToken = process.env.TWITCH_ACCESS_TOKEN;
@@ -63,7 +48,7 @@ export async function GET(request: NextRequest) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = (await response.json()) as GameData[];
+    const data = (await response.json()) as IgdbGames[];
 
     if (data && data.length > 0) {
       return NextResponse.json(data);

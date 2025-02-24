@@ -11,3 +11,4 @@ globs: /**/*.(ts|tsx)
 - Use API route handlers to manage backend logic within the app structure.
 - Optimize server-side rendering (SSR) and static site generation (SSG) for faster loading times.
 - Use Tanstack query for fetching endpoints from API.
+- All API routes are located at app/api folder.
