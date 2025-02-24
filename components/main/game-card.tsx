@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import Modal from "@/components/ui/modal"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { PlusCircle, Calendar } from "lucide-react"
+import { PlusCircle, Calendar, ExternalLink } from "lucide-react"
 import { format } from "date-fns"
 
 interface GameCover {
@@ -75,12 +76,20 @@ const GameCard = ({ game }: GameCardProps) => {
               className="h-full w-full rounded-lg shadow-lg"
               style={imageStyles}
             />
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="absolute top-3 right-3 bg-gray-950/60 p-1.5 rounded-full opacity-0 group-hover/card:opacity-100 hover:bg-gray-800 transition-all duration-200 z-10"
-            >
-              <PlusCircle className="w-5 h-5 text-white" />
-            </button>
+            <div className="absolute top-3 right-3 flex gap-2">
+              <Link 
+                href={`/game/${game.id}`}
+                className="bg-gray-950/60 p-1.5 rounded-full opacity-0 group-hover/card:opacity-100 hover:bg-gray-800 transition-all duration-200 z-10"
+              >
+                <ExternalLink className="w-5 h-5 text-white" />
+              </Link>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-gray-950/60 p-1.5 rounded-full opacity-0 group-hover/card:opacity-100 hover:bg-gray-800 transition-all duration-200 z-10"
+              >
+                <PlusCircle className="w-5 h-5 text-white" />
+              </button>
+            </div>
           </div>
 
           {/* Game information */}

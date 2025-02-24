@@ -52,28 +52,17 @@ export default function Header() {
     return (
         <>
             <header
-                className={`fixed top-0 left-0 w-full bg-background/60 backdrop-blur-3xl z-50 transition-all duration-300 ${isVisible ? "translate-y-0 shadow-md" : "-translate-y-full"}`}
+                className={`fixed top-0 left-0 w-full bg-background/60 backdrop-blur-3xl z-50 transition-all duration-300 bg-quokka-purple ${isVisible ? "translate-y-0 shadow-md" : "-translate-y-full"}`}
             >
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="text-2xl font-bold text-primary">
+                    <Link href="/" className="text-2xl font-bold text-primary flex items-center justify-between gap-2">
                         <div className="w-12 h-12 rounded-full bg-quokka-cyan flex items-center justify-center">
                             <Logo size={50} />
                         </div>
+                        <span className="text-quokka-cyan">QUOKKA</span>
+                
                     </Link>
-                    <nav className="hidden md:flex space-x-4">
-                        <Link href="/" className="text-foreground hover:text-primary">
-                            Home
-                        </Link>
-                        <Link href="/about" className="text-foreground hover:text-primary">
-                            About
-                        </Link>
-                        <Link href="/services" className="text-foreground hover:text-primary">
-                            Services
-                        </Link>
-                        <Link href="/contact" className="text-foreground hover:text-primary">
-                            Contact
-                        </Link>
-                    </nav>
+            
                     <div className="flex items-center space-x-4">
                         <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
                             <Search className="h-5 w-5" />

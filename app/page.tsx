@@ -43,6 +43,8 @@ export default function Home() {
     // Handle token error UI
   }
 
+  console.log(lastReleasedGames)
+
   return (
     <div className="space-y-8">
       <Header />
