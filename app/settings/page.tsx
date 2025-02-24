@@ -24,7 +24,7 @@ const SettingsPage = async () => {
   }
 
   return (
-    <div className="mx-auto max-w-[1440px]">
+    <div className="container mx-auto">
       <div className="flex">
         <Sidebar />
         <div className="space-y-8 w-[100%] p-8">

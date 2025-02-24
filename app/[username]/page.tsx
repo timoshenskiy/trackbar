@@ -30,7 +30,7 @@ export default async function UserProfilePage({
   const isOwnProfile = currentUser?.user_metadata?.username === params.username;
 
   return (
-    <div className="mx-auto max-w-[1440px]">
+    <div className="container mx-auto">
       <div className="flex">
         <Sidebar />
         <ProfileContent
