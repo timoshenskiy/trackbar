@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { GameSearchResult } from "@/utils/redis";
+import { GameSearchResult } from "@/utils/types/game";
 
 interface UseGameSearchProps {
   query: string;
@@ -20,7 +20,7 @@ export const useGameSearch = ({
         return [];
       }
 
-      const response = await axios.get("/api/games/search", {
+      const response = await axios.get("/api/search", {
         params: {
           q: query,
           token,

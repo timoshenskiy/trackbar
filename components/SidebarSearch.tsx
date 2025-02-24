@@ -2,24 +2,24 @@
 
 import { Search } from "lucide-react";
 import { useState } from "react";
-import AddGameModal from "./AddGameModal";
+import GameSearchModal from "./GameSearchModal";
 
 export function SidebarSearch() {
-  const [isAddGameModalOpen, setIsAddGameModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   return (
     <>
       <button
-        onClick={() => setIsAddGameModalOpen(true)}
+        onClick={() => setIsSearchModalOpen(true)}
         className="w-full bg-quokka-cyan text-quokka-dark rounded-full py-3 px-4 mb-8 flex items-center gap-2 hover:bg-quokka-cyan/80 transition-colors"
       >
         <Search className="w-5 h-5" />
-        Game
+        Search Games
       </button>
 
-      <AddGameModal
-        isOpen={isAddGameModalOpen}
-        onClose={() => setIsAddGameModalOpen(false)}
+      <GameSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
       />
     </>
   );
