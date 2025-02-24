@@ -39,15 +39,15 @@ export function AuthForm({ searchParams }: { searchParams: Message }) {
 
   if ("message" in searchParams) {
     return (
-      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
+      <div className="flex h-screen w-full items-center justify-center p-4">
         <FormMessage message={searchParams} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-[100vw] flex items-center justify-center bg-quokka-light dark:bg-quokka-dark">
-      <div className="flex-1 flex flex-col max-w-[500px] items-center justify-center p-4 gap-4">
+    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-quokka-light to-quokka-purple/10 dark:from-quokka-dark dark:to-quokka-purple/20">
+      <div className="w-[100vw] flex min-h-screen flex-col items-center justify-center p-4 md:p-8 lg:p-12">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={mode}
@@ -60,126 +60,185 @@ export function AuthForm({ searchParams }: { searchParams: Message }) {
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 },
             }}
-            className="w-full max-w-4xl bg-background/80 backdrop-blur-xl p-8 rounded-xl shadow-lg border border-quokka-purple/20"
+            className="w-full max-w-3xl overflow-hidden rounded-xl border border-quokka-purple/20 bg-background/90 backdrop-blur-xl shadow-lg"
           >
-            <Link href="/" className="mb-4">
-              <Logo size={100} />
-            </Link>
-            {mode === "signin" && (
-              <form className="flex-1 flex flex-col w-full">
-                <h1 className="text-3xl font-bold text-quokka-purple mb-2">Sign in</h1>
-                <p className="text-sm text-foreground/80 mb-8">
-                  Don't have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setMode("signup")}
-                    className="text-quokka-purple font-medium hover:text-quokka-cyan transition-colors"
-                  >
-                    Sign up
-                  </button>
-                </p>
-                <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-                  <Label htmlFor="email">Email</Label>
-                  <Input name="email" placeholder="you@example.com" required />
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <button
-                      type="button"
-                      onClick={() => setMode("forgot")}
-                      className="text-xs text-foreground underline"
-                    >
-                      Forgot Password?
-                    </button>
+            <div className="flex min-h-[80vh] flex-col items-center justify-center p-6 md:p-8 lg:p-10">
+              <Link href="/" className="mb-8 transition-transform hover:scale-105">
+                <Logo size={120} />
+              </Link>
+              
+              {mode === "signin" && (
+                <form className="w-full max-w-md mx-auto space-y-6">
+                  <div className="text-center">
+                    <h1 className="text-3xl font-bold text-quokka-purple">Sign in</h1>
+                    <div className="mt-2 flex justify-center gap-1 text-sm text-muted-foreground">
+                      <span>New user?</span>
+                      <button
+                        type="button"
+                        onClick={() => setMode("signup")}
+                        className="font-medium text-quokka-purple hover:text-quokka-cyan transition-colors"
+                      >
+                        Create account
+                      </button>
+                    </div>
                   </div>
-                  <Input
-                    type="password"
-                    name="password"
-                    placeholder="Your password"
-                    required
-                    className="border-quokka-purple/20 focus:border-quokka-purple"
-                  />
-                  <SubmitButton
-                    pendingText="Signing In..."
-                    formAction={signInAction}
-                    className="bg-quokka-purple hover:bg-quokka-purple/90 text-white transition-colors"
-                  >
-                    Sign in
-                  </SubmitButton>
-                  <FormMessage message={searchParams} />
-                </div>
-              </form>
-            )}
-
-            {mode === "signup" && (
-              <form className="flex-1 flex flex-col w-full">
-                <h1 className="text-3xl font-bold text-quokka-purple mb-2">Sign up</h1>
-                <p className="text-sm text-foreground/80 mb-8">
-                  Already have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setMode("signin")}
-                    className="text-quokka-purple font-medium hover:text-quokka-cyan transition-colors"
-                  >
-                    Sign in
-                  </button>
-                </p>
-                <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-                  <Label htmlFor="email">Email</Label>
-                  <Input name="email" placeholder="you@example.com" required />
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    name="username"
-                    placeholder="Choose a username"
-                    required
-                    pattern="^[a-zA-Z0-9_]{3,15}$"
-                    title="Username must be 3-15 characters long and can only contain letters, numbers, and underscores"
-                  />
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    type="password"
-                    name="password"
-                    placeholder="Your password"
-                    minLength={8}
-                    required
-                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%\^&*])[A-Za-z0-9!@#$%\^&*]{8,}$"
-                    title="Must contain at least 8 characters, including: uppercase letter, lowercase letter, number, and special character (!@#$%^&*)"
-                  />
-                  <SubmitButton
-                    formAction={signUpAction}
-                    pendingText="Signing up..."
-                  >
-                    Sign up
-                  </SubmitButton>
-                  <FormMessage message={searchParams} />
-                </div>
-              </form>
-            )}
-
-            {mode === "forgot" && (
-              <form className="flex-1 flex flex-col w-full gap-2 text-foreground [&>input]:mb-6 min-w-64">
-                <div>
-                  <h1 className="text-2xl font-medium">Reset Password</h1>
-                  <p className="text-sm text-secondary-foreground">
-                    Remember your password?{" "}
-                    <button
-                      type="button"
-                      onClick={() => setMode("signin")}
-                      className="text-primary underline"
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-base">Email</Label>
+                      <Input 
+                        name="email" 
+                        id="email"
+                        placeholder="you@example.com" 
+                        required 
+                        className="h-12 border-input/50 focus-visible:ring-quokka-purple/50 text-base"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="password" className="text-base">Password</Label>
+                        <button
+                          type="button"
+                          onClick={() => setMode("forgot")}
+                          className="text-sm text-muted-foreground hover:text-foreground"
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                      <Input
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="Your password"
+                        required
+                        className="h-12 border-input/50 focus-visible:ring-quokka-purple/50 text-base"
+                      />
+                    </div>
+                    
+                    <SubmitButton
+                      pendingText="Signing in..."
+                      formAction={signInAction}
+                      className="w-full h-12 mt-2 bg-quokka-purple hover:bg-quokka-purple/90 text-white text-base"
                     >
                       Sign in
-                    </button>
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-                  <Label htmlFor="email">Email</Label>
-                  <Input name="email" placeholder="you@example.com" required />
-                  <SubmitButton formAction={forgotPasswordAction}>
-                    Reset Password
-                  </SubmitButton>
-                  <FormMessage message={searchParams} />
-                </div>
-              </form>
-            )}
+                    </SubmitButton>
+                    
+                    <FormMessage message={searchParams} />
+                  </div>
+                </form>
+              )}
+
+              {mode === "signup" && (
+                <form className="w-full max-w-md mx-auto space-y-6">
+                  <div className="text-center">
+                    <h1 className="text-3xl font-bold text-quokka-purple">Create account</h1>
+                    <div className="mt-2 flex justify-center gap-1 text-sm text-muted-foreground">
+                      <span>Already registered?</span>
+                      <button
+                        type="button"
+                        onClick={() => setMode("signin")}
+                        className="font-medium text-quokka-purple hover:text-quokka-cyan transition-colors"
+                      >
+                        Sign in
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-base">Email</Label>
+                      <Input 
+                        name="email" 
+                        id="email"
+                        placeholder="you@example.com" 
+                        required 
+                        className="h-12 border-input/50 focus-visible:ring-quokka-purple/50 text-base"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="username" className="text-base">Username</Label>
+                      <Input
+                        name="username"
+                        id="username"
+                        placeholder="Choose a username"
+                        required
+                        pattern="^[a-zA-Z0-9_]{3,15}$"
+                        title="Username must be 3-15 characters long and can only contain letters, numbers, and underscores"
+                        className="h-12 border-input/50 focus-visible:ring-quokka-purple/50 text-base"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-base">Password</Label>
+                      <Input
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="Create a password"
+                        minLength={8}
+                        required
+                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%\^&*])[A-Za-z0-9!@#$%\^&*]{8,}$"
+                        title="Must contain at least 8 characters, including: uppercase letter, lowercase letter, number, and special character (!@#$%^&*)"
+                        className="h-12 border-input/50 focus-visible:ring-quokka-purple/50 text-base"
+                      />
+                    </div>
+                    
+                    <SubmitButton
+                      formAction={signUpAction}
+                      pendingText="Creating account..."
+                      className="w-full h-12 mt-2 bg-quokka-purple hover:bg-quokka-purple/90 text-white text-base"
+                    >
+                      Create account
+                    </SubmitButton>
+                    
+                    <FormMessage message={searchParams} />
+                  </div>
+                </form>
+              )}
+
+              {mode === "forgot" && (
+                <form className="w-full max-w-md mx-auto space-y-6">
+                  <div className="text-center">
+                    <h1 className="text-3xl font-bold text-quokka-purple">Reset password</h1>
+                    <div className="mt-2 flex justify-center gap-1 text-sm text-muted-foreground">
+                      <span>Remember your password?</span>
+                      <button
+                        type="button"
+                        onClick={() => setMode("signin")}
+                        className="font-medium text-quokka-purple hover:text-quokka-cyan transition-colors"
+                      >
+                        Sign in
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-base">Email</Label>
+                      <Input 
+                        name="email" 
+                        id="email"
+                        placeholder="you@example.com" 
+                        required 
+                        className="h-12 border-input/50 focus-visible:ring-quokka-purple/50 text-base"
+                      />
+                    </div>
+                    
+                    <SubmitButton 
+                      formAction={forgotPasswordAction}
+                      pendingText="Sending reset link..."
+                      className="w-full h-12 mt-2 bg-quokka-purple hover:bg-quokka-purple/90 text-white text-base"
+                    >
+                      Send reset link
+                    </SubmitButton>
+                    
+                    <FormMessage message={searchParams} />
+                  </div>
+                </form>
+              )}
+            </div>
           </motion.div>
         </AnimatePresence>
         <SmtpMessage />

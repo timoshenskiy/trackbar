@@ -2,6 +2,9 @@ import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 import { ProfileContent } from "./profile-content";
 import Sidebar from "@/components/Sidebar";
+import { getServerUser } from "@/utils/supabase/server-auth";
+import Header from "@/components/main/header";
+import Footer from "@/components/main/footer";
 
 export default async function UserProfilePage({
   params,
@@ -11,9 +14,7 @@ export default async function UserProfilePage({
   const supabase = await createClient();
 
   // Get the current logged-in user
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
+  const currentUser = await getServerUser();
 
   // Get user by username from metadata
   const { data: userData, error } = await supabase.rpc("get_user_by_username", {
@@ -30,7 +31,8 @@ export default async function UserProfilePage({
   const isOwnProfile = currentUser?.user_metadata?.username === params.username;
 
   return (
-    <div className="container mx-auto">
+    <div className="min-h-screen bg-quokka-darker text-quokka-light">
+      <Header />
       <div className="flex">
         <Sidebar />
         <ProfileContent
@@ -40,6 +42,7 @@ export default async function UserProfilePage({
           avatarUrl={userData.avatar_url}
         />
       </div>
+      <Footer />
     </div>
   );
 }
