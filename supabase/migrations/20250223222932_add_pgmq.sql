@@ -73,6 +73,9 @@ END;
 $$;
 
 -- Grant execute permissions on the wrapper functions
-GRANT EXECUTE ON FUNCTION public.enqueue_game TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.dequeue_games TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.archive_game_message TO anon, authenticated, service_role;
+-- Only service_role and authenticated users should be able to enqueue games
+GRANT EXECUTE ON FUNCTION public.enqueue_game TO authenticated, service_role;
+
+-- Only service_role should be able to dequeue and archive messages
+GRANT EXECUTE ON FUNCTION public.dequeue_games TO service_role;
+GRANT EXECUTE ON FUNCTION public.archive_game_message TO service_role;
