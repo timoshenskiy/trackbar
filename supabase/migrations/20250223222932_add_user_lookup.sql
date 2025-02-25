@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION public.get_user_by_username(p_username text)
 RETURNS json
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 STABLE
 AS $$
 DECLARE
@@ -27,4 +27,4 @@ $$;
 
 -- Grant execute permission on get_user_by_username
 -- This function only retrieves public user profile information, so it's safe for all roles
-GRANT EXECUTE ON FUNCTION public.get_user_by_username(text) TO postgres, anon, authenticated, service_role; 
+GRANT EXECUTE ON FUNCTION public.get_user_by_username(text) TO postgres, anon, authenticated, service_role;

@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.process_game_queue()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 DECLARE
     v_batch_size INTEGER := 25;  -- Number of messages to process in one batch
@@ -330,7 +330,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 DECLARE
     v_active BIGINT;
@@ -371,7 +371,7 @@ CREATE OR REPLACE FUNCTION public.trigger_process_game_queue()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
     PERFORM public.process_game_queue();
