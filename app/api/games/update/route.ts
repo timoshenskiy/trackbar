@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import axios from "axios";
 import { GameSearchResult } from "@/utils/redis";
+import { getIGDBToken } from "@/utils/igdb/token";
 
 // Helper function to get games that need updating
 const getOutdatedGames = async () => {
@@ -24,11 +25,12 @@ const getOutdatedGames = async () => {
 };
 
 // Helper function to fetch updated game data from IGDB
-const fetchGameUpdates = async (gameIds: number[], accessToken: string) => {
+const fetchGameUpdates = async (
+  gameIds: number[]
+): Promise<GameSearchResult[]> => {
   try {
     const response = await axios.post("/api/igdb/games", {
       endpoint: "games",
-      accessToken,
       data: `
         fields name, cover.url, first_release_date, rating, total_rating, summary,
                genres.name, platforms.name, screenshots.url, videos.video_id,
@@ -74,15 +76,6 @@ const updateGamesInDatabase = async (games: GameSearchResult[]) => {
 
 export async function POST(request: Request) {
   try {
-    const { accessToken } = await request.json();
-
-    if (!accessToken) {
-      return NextResponse.json(
-        { error: "Access token is required" },
-        { status: 400 }
-      );
-    }
-
     // Get games that need updating
     const outdatedGames = await getOutdatedGames();
     if (outdatedGames.length === 0) {
@@ -91,7 +84,7 @@ export async function POST(request: Request) {
 
     // Fetch updates from IGDB
     const gameIds = outdatedGames.map((game) => game.id);
-    const updatedGames = await fetchGameUpdates(gameIds, accessToken);
+    const updatedGames = await fetchGameUpdates(gameIds);
     if (updatedGames.length === 0) {
       return NextResponse.json({ message: "No updates available from IGDB" });
     }

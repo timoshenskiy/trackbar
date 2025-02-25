@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError } from "axios";
 
 export interface IGDBGame {
   id: number;
@@ -24,12 +24,12 @@ class IGDBError extends Error {
     public details?: unknown
   ) {
     super(message);
-    this.name = 'IGDBError';
+    this.name = "IGDBError";
   }
 }
 
 const axiosInstance = axios.create({
-  baseURL: '/api/igdb',  // Updated path
+  baseURL: "/api/igdb", // Updated path
 });
 
 const handleIGDBError = (error: AxiosError) => {
@@ -41,58 +41,43 @@ const handleIGDBError = (error: AxiosError) => {
 };
 
 export const igdbAdapter = {
-  getAccessToken: async (): Promise<string> => {
+  getLatestGames: async (): Promise<IGDBGame[]> => {
     try {
-      const response = await axiosInstance.post("/token");  // Updated path
-      return response.data.access_token;
-    } catch (error) {
-      handleIGDBError(error as AxiosError);
-    }
-  },
-
-  getLatestGames: async (accessToken: string): Promise<IGDBGame[]> => {
-    try {
-      if (!accessToken?.startsWith('Bearer ')) {
-        throw new IGDBError('Invalid token format');
-      }
-
-      const response = await axiosInstance.post("/games", {  // Updated path
-        endpoint: 'games',
-        accessToken,
+      const response = await axiosInstance.post("/games", {
+        // Updated path
+        endpoint: "games",
         data: `fields name, cover.url, first_release_date, rating, total_rating, summary, 
                genres.name, platforms.name, screenshots.url, videos.video_id, 
                involved_companies.company.name;
                sort first_release_date desc;
                where first_release_date < ${Math.floor(Date.now() / 1000)};
-               limit 30;`
+               limit 30;`,
       });
 
       return response.data;
     } catch (error) {
       handleIGDBError(error as AxiosError);
+      return []; // This line will never be reached due to handleIGDBError throwing, but satisfies TypeScript
     }
   },
 
-  getUpcomingGames: async (accessToken: string): Promise<IGDBGame[]> => {
+  getUpcomingGames: async (): Promise<IGDBGame[]> => {
     try {
-      if (!accessToken?.startsWith('Bearer ')) {
-        throw new IGDBError('Invalid token format');
-      }
-
-      const response = await axiosInstance.post("/games", {  // Updated path
-        endpoint: 'games',
-        accessToken,
+      const response = await axiosInstance.post("/games", {
+        // Updated path
+        endpoint: "games",
         data: `fields name, cover.url, first_release_date, summary, 
                genres.name, platforms.name, screenshots.url, videos.video_id, 
                involved_companies.company.name;
                sort first_release_date asc;
                where first_release_date > ${Math.floor(Date.now() / 1000)};
-               limit 30;`
+               limit 30;`,
       });
 
       return response.data;
     } catch (error) {
       handleIGDBError(error as AxiosError);
+      return []; // This line will never be reached due to handleIGDBError throwing, but satisfies TypeScript
     }
-  }
+  },
 };

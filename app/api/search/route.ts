@@ -9,27 +9,17 @@ import { searchPostgres } from "@/utils/search/postgres";
 import { searchIGDB } from "@/utils/search/igdb";
 import { createClient } from "@/utils/supabase/server";
 import { deduplicateGames } from "@/utils/search/utils";
+import { getIGDBToken } from "@/utils/igdb/token";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q");
-  const accessToken = searchParams.get("token");
 
-  console.log("Received search request:", {
-    query,
-    accessToken: accessToken?.substring(0, 10) + "...",
-  });
+  console.log("Received search request:", { query });
 
   if (!query) {
     return NextResponse.json(
       { error: "Query parameter is required" },
-      { status: 400 }
-    );
-  }
-
-  if (!accessToken) {
-    return NextResponse.json(
-      { error: "Access token is required" },
       { status: 400 }
     );
   }
@@ -48,7 +38,7 @@ export async function GET(request: Request) {
     console.log("Starting parallel search...");
     const [postgresResults, igdbResults] = await Promise.all([
       searchPostgres(query),
-      searchIGDB(query, accessToken),
+      searchIGDB(query),
     ]);
 
     console.log("Search results:", {
