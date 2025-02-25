@@ -2,7 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trophy, Clock, Star, Gamepad2, Search, Filter, ChevronDown, Heart, BarChart3, Zap, Shield, X, LayoutGrid, List } from "lucide-react";
+import {
+  Pencil,
+  Trophy,
+  Clock,
+  Star,
+  Gamepad2,
+  Search,
+  Filter,
+  ChevronDown,
+  Heart,
+  BarChart3,
+  Zap,
+  Shield,
+  X,
+  LayoutGrid,
+  List,
+  Plus,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -11,6 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import AddGameModal from "@/components/AddGameModal";
+import GameSearchModal from "@/components/GameSearchModal";
 import { GameSearchResult } from "@/utils/types/game";
 
 interface Genre {
@@ -51,8 +69,11 @@ export function ProfileContent({
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "row">("grid");
-  const [selectedGame, setSelectedGame] = useState<GameSearchResult | null>(null);
+  const [selectedGame, setSelectedGame] = useState<GameSearchResult | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   // Fetch user's games
   const { data: games = [], isLoading } = useQuery({
@@ -103,7 +124,10 @@ export function ProfileContent({
         id: ug.game.id,
         title: ug.game.name,
         cover: ug.game.cover?.url,
-        genres: ug.game.game_to_genres?.map((g: { genres: Genre }) => g.genres.name) || [],
+        genres:
+          ug.game.game_to_genres?.map(
+            (g: { genres: Genre }) => g.genres.name
+          ) || [],
         platform: ug.game.game_to_platforms?.[0]?.platforms.name || "Unknown",
         status:
           ug.status === "want_to_play"
@@ -134,11 +158,36 @@ export function ProfileContent({
   };
 
   const tabs = [
-    { name: "All", count: getStatusCount("All"), icon: "🎮", color: "quokka-cyan" },
-    { name: "Finished", count: getStatusCount("Finished"), icon: "✓", color: "green-500" },
-    { name: "Playing", count: getStatusCount("Playing"), icon: "▶", color: "blue-500" },
-    { name: "Dropped", count: getStatusCount("Dropped"), icon: "✕", color: "red-500" },
-    { name: "Want", count: getStatusCount("Want"), icon: "⭐", color: "yellow-500" },
+    {
+      name: "All",
+      count: getStatusCount("All"),
+      icon: "🎮",
+      color: "quokka-cyan",
+    },
+    {
+      name: "Finished",
+      count: getStatusCount("Finished"),
+      icon: "✓",
+      color: "green-500",
+    },
+    {
+      name: "Playing",
+      count: getStatusCount("Playing"),
+      icon: "▶",
+      color: "blue-500",
+    },
+    {
+      name: "Dropped",
+      count: getStatusCount("Dropped"),
+      icon: "✕",
+      color: "red-500",
+    },
+    {
+      name: "Want",
+      count: getStatusCount("Want"),
+      icon: "⭐",
+      color: "yellow-500",
+    },
   ];
 
   const totalPlaytime = games.reduce(
@@ -160,21 +209,29 @@ export function ProfileContent({
   // Filter games based on active tab and search term
   const filteredGames = games.filter((game) => {
     const matchesTab = activeTab === "All" || game.status === activeTab;
-    const matchesSearch = game.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch =
+      game.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       game.platform.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      game.genres.some((genre: string) => genre.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+      game.genres.some((genre: string) =>
+        genre.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
     return matchesTab && matchesSearch;
   });
 
   // Get status color
   const getStatusColor = (status: string) => {
-    switch(status) {
-      case "Finished": return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "Playing": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "Dropped": return "bg-red-500/20 text-red-400 border-red-500/30";
-      case "Want": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      default: return "bg-quokka-purple/20 text-quokka-purple border-quokka-purple/30";
+    switch (status) {
+      case "Finished":
+        return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "Playing":
+        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "Dropped":
+        return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "Want":
+        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      default:
+        return "bg-quokka-purple/20 text-quokka-purple border-quokka-purple/30";
     }
   };
 
@@ -183,11 +240,14 @@ export function ProfileContent({
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    
+
     return (
       <div className="flex">
         {[...Array(fullStars)].map((_, i) => (
-          <Star key={`full-${i}`} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          <Star
+            key={`full-${i}`}
+            className="w-4 h-4 fill-yellow-400 text-yellow-400"
+          />
         ))}
         {hasHalfStar && (
           <div className="relative w-4 h-4">
@@ -207,7 +267,7 @@ export function ProfileContent({
   // Function to handle opening the modal with the selected game
   const handleGameClick = (game: Game) => {
     if (!isOwnProfile) return; // Only allow editing on own profile
-    
+
     // Convert Game to GameSearchResult format with additional properties for editing
     const gameForModal: GameSearchResult & {
       userStatus?: string;
@@ -217,23 +277,38 @@ export function ProfileContent({
     } = {
       id: game.id,
       name: game.title,
-      slug: game.title.toLowerCase().replace(/\s+/g, '-'),
-      cover: game.cover ? { 
-        id: 0, 
-        url: game.cover,
-        width: 0,
-        height: 0
-      } : undefined,
-      genres: game.genres.map(name => ({ id: 0, name, slug: name.toLowerCase().replace(/\s+/g, '-') })),
-      platforms: [{ id: 0, name: game.platform, slug: game.platform.toLowerCase().replace(/\s+/g, '-') }],
+      slug: game.title.toLowerCase().replace(/\s+/g, "-"),
+      cover: game.cover
+        ? {
+            id: 0,
+            url: game.cover,
+            width: 0,
+            height: 0,
+          }
+        : undefined,
+      genres: game.genres.map((name) => ({
+        id: 0,
+        name,
+        slug: name.toLowerCase().replace(/\s+/g, "-"),
+      })),
+      platforms: [
+        {
+          id: 0,
+          name: game.platform,
+          slug: game.platform.toLowerCase().replace(/\s+/g, "-"),
+        },
+      ],
       created_at: Date.now(),
       // Add properties for editing
-      userStatus: game.status.toLowerCase() === 'want' ? 'want_to_play' : game.status.toLowerCase(),
+      userStatus:
+        game.status.toLowerCase() === "want"
+          ? "want_to_play"
+          : game.status.toLowerCase(),
       userRating: game.rating,
-      userReview: '', // We don't have this in the Game interface, so default to empty
-      userGameId: game.id // Use the game ID as the user game ID for now
+      userReview: "", // We don't have this in the Game interface, so default to empty
+      userGameId: game.id, // Use the game ID as the user game ID for now
     };
-    
+
     setSelectedGame(gameForModal);
     setIsModalOpen(true);
   };
@@ -262,28 +337,37 @@ export function ProfileContent({
               <div className="h-6 w-64 bg-quokka-dark/50 rounded-lg"></div>
             </div>
           </div>
-          
+
           {/* Stats Cards Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-quokka-dark/30 rounded-xl p-6 animate-pulse">
+              <div
+                key={i}
+                className="bg-quokka-dark/30 rounded-xl p-6 animate-pulse"
+              >
                 <div className="h-5 w-32 bg-quokka-dark/50 rounded-lg mb-4"></div>
                 <div className="h-8 w-16 bg-quokka-dark/50 rounded-lg"></div>
               </div>
             ))}
           </div>
-          
+
           {/* Tabs Skeleton */}
           <div className="flex gap-2 mb-8 overflow-x-auto pb-2 animate-pulse">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-10 w-28 bg-quokka-dark/50 rounded-full"></div>
+              <div
+                key={i}
+                className="h-10 w-28 bg-quokka-dark/50 rounded-full"
+              ></div>
             ))}
           </div>
-          
+
           {/* Games Grid Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-quokka-dark/30 rounded-xl p-4 animate-pulse">
+              <div
+                key={i}
+                className="bg-quokka-dark/30 rounded-xl p-4 animate-pulse"
+              >
                 <div className="flex gap-4">
                   <div className="w-20 h-28 bg-quokka-dark/50 rounded-lg"></div>
                   <div className="flex-1 space-y-3">
@@ -307,7 +391,7 @@ export function ProfileContent({
         <div className="relative mb-12">
           {/* Background gradient */}
           <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-r from-quokka-purple/20 to-quokka-cyan/20 rounded-xl -z-10"></div>
-          
+
           <div className="pt-8 px-6 flex flex-col md:flex-row items-start md:items-end gap-6">
             {/* Avatar */}
             <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-quokka-purple to-quokka-cyan p-1 shadow-xl shadow-quokka-purple/10">
@@ -325,7 +409,7 @@ export function ProfileContent({
                 </div>
               )}
             </div>
-            
+
             {/* User info */}
             <div className="flex-1">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -338,11 +422,16 @@ export function ProfileContent({
                       </button>
                     )}
                   </h1>
-                  <div className="text-quokka-light/60 text-sm mb-2">@{username}</div>
-                  
+                  <div className="text-quokka-light/60 text-sm mb-2">
+                    @{username}
+                  </div>
+
                   <div className="flex gap-6 items-center">
                     <div className="flex items-center gap-1.5">
-                      <Badge variant="outline" className="bg-quokka-purple/10 border-quokka-purple/30 text-quokka-purple px-2 py-0.5">
+                      <Badge
+                        variant="outline"
+                        className="bg-quokka-purple/10 border-quokka-purple/30 text-quokka-purple px-2 py-0.5"
+                      >
                         <Trophy className="w-3 h-3 mr-1" />
                         Level 5
                       </Badge>
@@ -350,21 +439,36 @@ export function ProfileContent({
                     <div className="flex items-center gap-4">
                       <div className="text-sm">
                         <span className="text-quokka-light/40">Following</span>
-                        <span className="ml-1.5 text-quokka-light font-medium">0</span>
+                        <span className="ml-1.5 text-quokka-light font-medium">
+                          0
+                        </span>
                       </div>
                       <div className="text-sm">
                         <span className="text-quokka-light/40">Followers</span>
-                        <span className="ml-1.5 text-quokka-light font-medium">0</span>
+                        <span className="ml-1.5 text-quokka-light font-medium">
+                          0
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
-                
-                {isOwnProfile && (
-                  <button className="px-4 py-2 bg-quokka-purple/20 hover:bg-quokka-purple/30 text-quokka-purple rounded-lg transition-colors text-sm font-medium">
-                    Edit Profile
-                  </button>
-                )}
+
+                <div className="flex gap-3">
+                  {isOwnProfile && (
+                    <>
+                      <button
+                        onClick={() => setIsSearchModalOpen(true)}
+                        className="px-4 py-2 bg-gradient-to-r from-quokka-purple to-quokka-cyan text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Game
+                      </button>
+                      <button className="px-4 py-2 bg-quokka-purple/20 hover:bg-quokka-purple/30 text-quokka-purple rounded-lg transition-colors text-sm font-medium">
+                        Edit Profile
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -381,11 +485,15 @@ export function ProfileContent({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-quokka-light">{totalPlaytime}h</div>
-              <div className="text-xs text-quokka-light/40 mt-1">Across {games.length} games</div>
+              <div className="text-2xl font-bold text-quokka-light">
+                {totalPlaytime}h
+              </div>
+              <div className="text-xs text-quokka-light/40 mt-1">
+                Across {games.length} games
+              </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-quokka-dark/30 border-quokka-purple/10 rounded-xl overflow-hidden group hover:border-quokka-purple/30 transition-colors">
             <CardHeader className="pb-2 relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-quokka-purple to-quokka-cyan scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
@@ -404,7 +512,7 @@ export function ProfileContent({
               />
             </CardContent>
           </Card>
-          
+
           <Card className="bg-quokka-dark/30 border-quokka-purple/10 rounded-xl overflow-hidden group hover:border-quokka-purple/30 transition-colors">
             <CardHeader className="pb-2 relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-quokka-purple to-quokka-cyan scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
@@ -423,7 +531,7 @@ export function ProfileContent({
               />
             </CardContent>
           </Card>
-          
+
           <Card className="bg-quokka-dark/30 border-quokka-purple/10 rounded-xl overflow-hidden group hover:border-quokka-purple/30 transition-colors">
             <CardHeader className="pb-2 relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-quokka-purple to-quokka-cyan scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
@@ -437,17 +545,21 @@ export function ProfileContent({
                 {Array.from(new Set(games.map((g: Game) => g.platform)))
                   .slice(0, 3)
                   .map((platform: string) => {
-                    const count = games.filter((g: Game) => g.platform === platform).length;
+                    const count = games.filter(
+                      (g: Game) => g.platform === platform
+                    ).length;
                     const percentage = (count / games.length) * 100;
-                    
+
                     return (
                       <div key={platform} className="flex items-center gap-2">
                         <div className="flex-1 flex justify-between">
-                          <span className="text-quokka-light/70 truncate">{platform}</span>
+                          <span className="text-quokka-light/70 truncate">
+                            {platform}
+                          </span>
                           <span className="text-quokka-light">{count}</span>
                         </div>
                         <div className="w-20 h-1.5 bg-quokka-dark rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className="h-full bg-gradient-to-r from-quokka-purple to-quokka-cyan"
                             style={{ width: `${percentage}%` }}
                           ></div>
@@ -455,9 +567,13 @@ export function ProfileContent({
                       </div>
                     );
                   })}
-                {Array.from(new Set(games.map((g: Game) => g.platform))).length > 3 && (
+                {Array.from(new Set(games.map((g: Game) => g.platform)))
+                  .length > 3 && (
                   <div className="text-xs text-quokka-light/40 text-right">
-                    +{Array.from(new Set(games.map((g: Game) => g.platform))).length - 3} more
+                    +
+                    {Array.from(new Set(games.map((g: Game) => g.platform)))
+                      .length - 3}{" "}
+                    more
                   </div>
                 )}
               </div>
@@ -467,8 +583,15 @@ export function ProfileContent({
 
         {/* Search and Filter */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className={`relative flex-1 transition-all duration-300 ${isSearchFocused ? 'ring-1 ring-quokka-purple' : ''}`}>
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-quokka-light/40" size={18} />
+          <div
+            className={`relative flex-1 transition-all duration-300 ${
+              isSearchFocused ? "ring-1 ring-quokka-purple" : ""
+            }`}
+          >
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-quokka-light/40"
+              size={18}
+            />
             <Input
               placeholder="Search games..."
               value={searchTerm}
@@ -499,22 +622,22 @@ export function ProfileContent({
             </button>
             {/* View Toggle */}
             <div className="flex rounded-lg overflow-hidden border border-quokka-purple/10">
-              <button 
+              <button
                 onClick={() => setViewMode("grid")}
                 className={`p-2 flex items-center justify-center transition-colors ${
-                  viewMode === "grid" 
-                    ? "bg-quokka-purple text-white" 
+                  viewMode === "grid"
+                    ? "bg-quokka-purple text-white"
                     : "bg-quokka-dark/30 text-quokka-light/70 hover:bg-quokka-dark/50"
                 }`}
                 aria-label="Grid view"
               >
                 <LayoutGrid size={16} />
               </button>
-              <button 
+              <button
                 onClick={() => setViewMode("row")}
                 className={`p-2 flex items-center justify-center transition-colors ${
-                  viewMode === "row" 
-                    ? "bg-quokka-purple text-white" 
+                  viewMode === "row"
+                    ? "bg-quokka-purple text-white"
                     : "bg-quokka-dark/30 text-quokka-light/70 hover:bg-quokka-dark/50"
                 }`}
                 aria-label="Row view"
@@ -539,11 +662,11 @@ export function ProfileContent({
             >
               <span>{tab.icon}</span>
               <span>{tab.name}</span>
-              <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                activeTab === tab.name
-                  ? "bg-white/20"
-                  : "bg-quokka-dark/50"
-              }`}>
+              <span
+                className={`px-1.5 py-0.5 rounded-full text-xs ${
+                  activeTab === tab.name ? "bg-white/20" : "bg-quokka-dark/50"
+                }`}
+              >
                 {tab.count}
               </span>
             </button>
@@ -555,7 +678,9 @@ export function ProfileContent({
           <div className="text-center py-12">
             <div className="text-quokka-light/40 mb-2">No games found</div>
             <div className="text-sm text-quokka-light/30">
-              {searchTerm ? "Try a different search term" : "Add some games to your collection"}
+              {searchTerm
+                ? "Try a different search term"
+                : "Add some games to your collection"}
             </div>
           </div>
         ) : viewMode === "grid" ? (
@@ -566,7 +691,9 @@ export function ProfileContent({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`bg-quokka-dark/30 border border-quokka-purple/10 rounded-xl overflow-hidden hover:border-quokka-purple/30 transition-all hover:shadow-lg hover:shadow-quokka-purple/5 group ${isOwnProfile ? 'cursor-pointer relative' : ''}`}
+                className={`bg-quokka-dark/30 border border-quokka-purple/10 rounded-xl overflow-hidden hover:border-quokka-purple/30 transition-all hover:shadow-lg hover:shadow-quokka-purple/5 group ${
+                  isOwnProfile ? "cursor-pointer relative" : ""
+                }`}
                 onClick={() => isOwnProfile && handleGameClick(game)}
               >
                 {isOwnProfile && (
@@ -582,7 +709,10 @@ export function ProfileContent({
                     <div className="w-20 h-28 rounded-lg overflow-hidden bg-quokka-dark/50 flex-shrink-0">
                       {game.cover ? (
                         <img
-                          src={`https:${game.cover.replace("t_thumb", "t_cover_big")}`}
+                          src={`https:${game.cover.replace(
+                            "t_thumb",
+                            "t_cover_big"
+                          )}`}
                           alt={game.title}
                           className="w-full h-full object-cover"
                         />
@@ -592,29 +722,31 @@ export function ProfileContent({
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Game Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-2">
                         <h3 className="font-bold text-quokka-light truncate group-hover:text-quokka-cyan transition-colors">
                           {game.title}
                         </h3>
-                        <Badge className={`${getStatusColor(game.status)} text-xs`}>
+                        <Badge
+                          className={`${getStatusColor(game.status)} text-xs`}
+                        >
                           {game.status}
                         </Badge>
                       </div>
-                      
+
                       <div className="mt-1 text-sm text-quokka-light/60">
                         {game.platform}
                       </div>
-                      
+
                       <div className="mt-2 flex items-center gap-1">
                         {getRatingStars(game.rating)}
                         <span className="text-xs text-quokka-light/40 ml-1">
                           {game.rating.toFixed(1)}
                         </span>
                       </div>
-                      
+
                       <div className="mt-3 flex flex-wrap gap-1">
                         {game.genres.slice(0, 2).map((genre: string) => (
                           <span
@@ -632,7 +764,7 @@ export function ProfileContent({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Game Stats */}
                   <div className="mt-4 pt-3 border-t border-quokka-purple/5 grid grid-cols-3 gap-2 text-xs">
                     {game.playtime !== undefined && (
@@ -644,7 +776,10 @@ export function ProfileContent({
                     {game.achievements && (
                       <div className="flex items-center gap-1.5 text-quokka-light/60">
                         <Trophy className="w-3 h-3 text-quokka-cyan" />
-                        <span>{game.achievements.completed}/{game.achievements.total}</span>
+                        <span>
+                          {game.achievements.completed}/
+                          {game.achievements.total}
+                        </span>
                       </div>
                     )}
                     <div className="flex items-center gap-1.5 text-quokka-light/60 justify-self-end col-span-2 justify-end">
@@ -663,7 +798,9 @@ export function ProfileContent({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`bg-quokka-dark/30 border border-quokka-purple/10 rounded-xl overflow-hidden hover:border-quokka-purple/30 transition-all hover:shadow-lg hover:shadow-quokka-purple/5 group ${isOwnProfile ? 'cursor-pointer relative' : ''}`}
+                className={`bg-quokka-dark/30 border border-quokka-purple/10 rounded-xl overflow-hidden hover:border-quokka-purple/30 transition-all hover:shadow-lg hover:shadow-quokka-purple/5 group ${
+                  isOwnProfile ? "cursor-pointer relative" : ""
+                }`}
                 onClick={() => isOwnProfile && handleGameClick(game)}
               >
                 {isOwnProfile && (
@@ -679,7 +816,10 @@ export function ProfileContent({
                     <div className="w-24 h-32 rounded-lg overflow-hidden bg-quokka-dark/50 flex-shrink-0">
                       {game.cover ? (
                         <img
-                          src={`https:${game.cover.replace("t_thumb", "t_cover_big")}`}
+                          src={`https:${game.cover.replace(
+                            "t_thumb",
+                            "t_cover_big"
+                          )}`}
                           alt={game.title}
                           className="w-full h-full object-cover"
                         />
@@ -689,7 +829,7 @@ export function ProfileContent({
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Game Info */}
                     <div className="flex-1 min-w-0 flex flex-col">
                       <div className="flex justify-between items-start gap-2">
@@ -703,18 +843,20 @@ export function ProfileContent({
                             <span>{game.dateAdded}</span>
                           </div>
                         </div>
-                        <Badge className={`${getStatusColor(game.status)} text-xs`}>
+                        <Badge
+                          className={`${getStatusColor(game.status)} text-xs`}
+                        >
                           {game.status}
                         </Badge>
                       </div>
-                      
+
                       <div className="mt-3 flex items-center gap-2">
                         {getRatingStars(game.rating)}
                         <span className="text-xs text-quokka-light/40 ml-1">
                           {game.rating.toFixed(1)}
                         </span>
                       </div>
-                      
+
                       <div className="mt-auto pt-3 flex flex-wrap gap-2">
                         {game.genres.map((genre: string) => (
                           <span
@@ -725,7 +867,7 @@ export function ProfileContent({
                           </span>
                         ))}
                       </div>
-                      
+
                       {/* Game Stats */}
                       <div className="mt-4 pt-3 border-t border-quokka-purple/5 flex gap-6 text-xs">
                         {game.playtime !== undefined && (
@@ -737,7 +879,10 @@ export function ProfileContent({
                         {game.achievements && (
                           <div className="flex items-center gap-1.5 text-quokka-light/60">
                             <Trophy className="w-3 h-3 text-quokka-cyan" />
-                            <span>{game.achievements.completed}/{game.achievements.total} achievements</span>
+                            <span>
+                              {game.achievements.completed}/
+                              {game.achievements.total} achievements
+                            </span>
                           </div>
                         )}
                         <div className="flex items-center gap-1.5 text-quokka-light/60 ml-auto">
@@ -764,6 +909,12 @@ export function ProfileContent({
             isEditing={true}
           />
         )}
+
+        {/* Game Search Modal */}
+        <GameSearchModal
+          isOpen={isSearchModalOpen}
+          onClose={() => setIsSearchModalOpen(false)}
+        />
       </div>
     </div>
   );
