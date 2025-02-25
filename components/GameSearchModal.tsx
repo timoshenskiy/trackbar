@@ -25,17 +25,9 @@ export default function GameSearchModal({
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Get IGDB access token
-  const { data: token } = useQuery({
-    queryKey: ["accessToken"],
-    queryFn: igdbAdapter.getAccessToken,
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
-
   const { data: searchResults, isLoading } = useGameSearch({
     query: searchQuery,
-    token: token || "",
-    enabled: searchQuery.length > 2 && !!token,
+    enabled: searchQuery.length > 2,
   });
 
   const handleGameSelect = (game: GameSearchResult) => {

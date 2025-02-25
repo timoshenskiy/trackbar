@@ -7,29 +7,19 @@ import { NextResponse } from "next/server";
 import { getGameSearchCache, setGameSearchCache } from "@/utils/redis";
 import { searchPostgres } from "@/utils/search/postgres";
 import { searchIGDB } from "@/utils/search/igdb";
-import { storeIGDBResults } from "@/utils/search/store";
+import { createClient } from "@/utils/supabase/server";
 import { deduplicateGames } from "@/utils/search/utils";
+import { getIGDBToken } from "@/utils/igdb/token";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q");
-  const accessToken = searchParams.get("token");
 
-  console.log("Received search request:", {
-    query,
-    accessToken: accessToken?.substring(0, 10) + "...",
-  });
+  console.log("Received search request:", { query });
 
   if (!query) {
     return NextResponse.json(
       { error: "Query parameter is required" },
-      { status: 400 }
-    );
-  }
-
-  if (!accessToken) {
-    return NextResponse.json(
-      { error: "Access token is required" },
       { status: 400 }
     );
   }
@@ -48,7 +38,7 @@ export async function GET(request: Request) {
     console.log("Starting parallel search...");
     const [postgresResults, igdbResults] = await Promise.all([
       searchPostgres(query),
-      searchIGDB(query, accessToken),
+      searchIGDB(query),
     ]);
 
     console.log("Search results:", {
@@ -63,14 +53,27 @@ export async function GET(request: Request) {
     // Step 4: Cache the results
     await setGameSearchCache(query, allResults);
 
-    // Step 5: Store IGDB results in PostgreSQL (background task)
+    // Step 5: Store IGDB results in PostgreSQL using PGMQ
     if (igdbResults.length > 0) {
-      // This should be moved to a background job in production
-      // Ideally it should be a queue system
-      // TODO: Implement background job
-      storeIGDBResults(igdbResults).catch((error) => {
-        console.error("Error storing IGDB results:", error);
-      });
+      const supabase = await createClient();
+      let enqueuedCount = 0;
+
+      // Send each game to the queue
+      for (const game of igdbResults) {
+        const { data: msgId, error } = await supabase.rpc("enqueue_game", {
+          p_queue_name: "game_store_queue",
+          p_message: game,
+        });
+
+        if (error) {
+          console.error("Error enqueueing game:", error);
+        } else if (msgId) {
+          // Only increment if message was actually enqueued (not a duplicate)
+          enqueuedCount++;
+        }
+      }
+
+      console.log(`Enqueued ${enqueuedCount} new games for processing`);
     }
 
     return NextResponse.json(allResults);

@@ -43,34 +43,21 @@ export interface GameSearchResult {
   slug: string;
   summary?: string;
   storyline?: string;
-  created_at: number;
   first_release_date?: number;
+  created_at?: number;
   total_rating?: number;
   url?: string;
   cover?: {
     id: number;
     url: string;
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
   };
   screenshots?: Array<{
     id: number;
     url: string;
-    width: number;
-    height: number;
-  }>;
-  websites?: Array<{
-    id: number;
-    type: string;
-    url: string;
-    trusted: boolean;
-  }>;
-  involved_companies?: string;
-  keywords?: string;
-  game_modes?: Array<{
-    id: number;
-    name: string;
-    slug: string;
+    width?: number;
+    height?: number;
   }>;
   genres?: Array<{
     id: number;
@@ -82,10 +69,34 @@ export interface GameSearchResult {
     name: string;
     slug: string;
   }>;
-  similar_games?: number[];
+  game_modes?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
+  websites?: Array<{
+    id: number;
+    type: string;
+    url: string;
+    trusted: boolean;
+  }>;
+  involved_companies?: Array<{
+    id: number;
+    company: {
+      id: number;
+      name: string;
+      slug: string;
+    };
+  }>;
   game_types?: Array<{
     id: number;
     type: string;
+  }>;
+  similar_games?: number[];
+  keywords?: Array<{
+    id: number;
+    name: string;
+    slug: string;
   }>;
 }
 

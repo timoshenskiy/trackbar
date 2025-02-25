@@ -40,7 +40,8 @@ CREATE TABLE games (
     involved_companies TEXT,
     keywords TEXT,
     similar_games BIGINT[],
-    updated_at TIMESTAMP DEFAULT now()
+    updated_at TIMESTAMP DEFAULT now(),
+    is_popular BOOLEAN DEFAULT false
 );
 
 -- Covers table (one-to-one with games)
@@ -163,6 +164,7 @@ CREATE INDEX idx_user_games_game_id ON user_games(game_id);
 CREATE INDEX idx_game_to_platforms_game_id ON game_to_platforms(game_id);
 CREATE INDEX idx_game_to_genres_game_id ON game_to_genres(game_id);
 CREATE INDEX idx_screenshots_game_id ON screenshots(game_id);
+CREATE INDEX idx_games_is_popular ON games(is_popular) WHERE is_popular = true;
 
 -- Row Level Security (RLS) policies
 ALTER TABLE user_games ENABLE ROW LEVEL SECURITY;
@@ -320,30 +322,3 @@ USING (
 ALTER TABLE games ENABLE ROW LEVEL SECURITY;
 ALTER TABLE websites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE screenshots ENABLE ROW LEVEL SECURITY;
-
--- Create the function
-create or replace function public.get_user_by_username(p_username text)
-returns json
-language plpgsql
-security definer
-set search_path = public
-stable
-as $$
-declare
-  v_result json;
-begin
-  -- Get the user metadata
-  select json_build_object(
-    'id', au.id,
-    'full_name', au.raw_user_meta_data->>'full_name',
-    'avatar_url', au.raw_user_meta_data->>'avatar_url',
-    'username', au.raw_user_meta_data->>'username'
-  )
-  into v_result
-  from auth.users au
-  where (au.raw_user_meta_data->>'username')::text = p_username;
-
-  -- Return the result (will be null if no user found)
-  return v_result;
-end;
-$$;
