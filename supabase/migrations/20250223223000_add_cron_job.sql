@@ -37,6 +37,10 @@ BEGIN
                 storyline, 
                 first_release_date,
                 created_at,
+                total_rating,
+                involved_companies,
+                keywords,
+                similar_games,
                 updated_at
             ) VALUES (
                 (v_game->>'id')::integer,
@@ -46,6 +50,14 @@ BEGIN
                 v_game->>'storyline',
                 (v_game->>'first_release_date')::bigint,
                 (v_game->>'created_at')::bigint,
+                (v_game->>'total_rating')::decimal,
+                v_game->'involved_companies',
+                v_game->'keywords',
+                CASE 
+                    WHEN v_game ? 'similar_games' AND jsonb_typeof(v_game->'similar_games') = 'array' 
+                    THEN (SELECT array_agg(x::bigint) FROM jsonb_array_elements_text(v_game->'similar_games') AS x)
+                    ELSE NULL::bigint[]
+                END,
                 now()
             )
             ON CONFLICT (id) DO UPDATE SET
@@ -54,7 +66,220 @@ BEGIN
                 summary = EXCLUDED.summary,
                 storyline = EXCLUDED.storyline,
                 first_release_date = EXCLUDED.first_release_date,
+                total_rating = EXCLUDED.total_rating,
+                involved_companies = EXCLUDED.involved_companies,
+                keywords = EXCLUDED.keywords,
+                similar_games = EXCLUDED.similar_games,
                 updated_at = now();
+                
+            -- Store cover if it exists
+            IF v_game ? 'cover' THEN
+                INSERT INTO public.covers (
+                    id,
+                    game_id,
+                    url,
+                    width,
+                    height
+                ) VALUES (
+                    (v_game->'cover'->>'id')::bigint,
+                    (v_game->>'id')::bigint,
+                    v_game->'cover'->>'url',
+                    (v_game->'cover'->>'width')::integer,
+                    (v_game->'cover'->>'height')::integer
+                )
+                ON CONFLICT (id) DO UPDATE SET
+                    url = EXCLUDED.url,
+                    width = EXCLUDED.width,
+                    height = EXCLUDED.height;
+            END IF;
+            
+            -- Store screenshots if they exist
+            IF v_game ? 'screenshots' AND jsonb_array_length(v_game->'screenshots') > 0 THEN
+                FOR i IN 0..jsonb_array_length(v_game->'screenshots')-1 LOOP
+                    INSERT INTO public.screenshots (
+                        id,
+                        game_id,
+                        url,
+                        width,
+                        height
+                    ) VALUES (
+                        (v_game->'screenshots'->i->>'id')::bigint,
+                        (v_game->>'id')::bigint,
+                        v_game->'screenshots'->i->>'url',
+                        (v_game->'screenshots'->i->>'width')::integer,
+                        (v_game->'screenshots'->i->>'height')::integer
+                    )
+                    ON CONFLICT (id) DO UPDATE SET
+                        url = EXCLUDED.url,
+                        width = EXCLUDED.width,
+                        height = EXCLUDED.height;
+                END LOOP;
+            END IF;
+            
+            -- Store websites if they exist
+            IF v_game ? 'websites' AND jsonb_array_length(v_game->'websites') > 0 THEN
+                FOR i IN 0..jsonb_array_length(v_game->'websites')-1 LOOP
+                    -- First ensure the website type exists
+                    IF v_game->'websites'->i ? 'type' AND jsonb_typeof(v_game->'websites'->i->'type') = 'object' AND v_game->'websites'->i->'type' ? 'id' THEN
+                        INSERT INTO public.website_types (
+                            id,
+                            type
+                        ) VALUES (
+                            (v_game->'websites'->i->'type'->>'id')::bigint,
+                            v_game->'websites'->i->'type'->>'type'
+                        )
+                        ON CONFLICT (id) DO NOTHING;
+                        
+                        -- Then insert the website with type_id
+                        INSERT INTO public.websites (
+                            id,
+                            game_id,
+                            url,
+                            trusted,
+                            type_id
+                        ) VALUES (
+                            (v_game->'websites'->i->>'id')::bigint,
+                            (v_game->>'id')::bigint,
+                            v_game->'websites'->i->>'url',
+                            (v_game->'websites'->i->>'trusted')::boolean,
+                            (v_game->'websites'->i->'type'->>'id')::bigint
+                        )
+                        ON CONFLICT (id) DO UPDATE SET
+                            url = EXCLUDED.url,
+                            trusted = EXCLUDED.trusted,
+                            type_id = EXCLUDED.type_id;
+                    END IF;
+                END LOOP;
+            END IF;
+            
+            -- Store game modes relationships if they exist
+            IF v_game ? 'game_modes' AND jsonb_array_length(v_game->'game_modes') > 0 THEN
+                FOR i IN 0..jsonb_array_length(v_game->'game_modes')-1 LOOP
+                    -- First ensure the game mode exists
+                    INSERT INTO public.game_modes (
+                        id,
+                        name,
+                        slug
+                    ) VALUES (
+                        (v_game->'game_modes'->i->>'id')::bigint,
+                        v_game->'game_modes'->i->>'name',
+                        v_game->'game_modes'->i->>'slug'
+                    )
+                    ON CONFLICT (id) DO NOTHING;
+                    
+                    -- Then create the relationship
+                    INSERT INTO public.game_to_modes (
+                        game_id,
+                        mode_id
+                    ) VALUES (
+                        (v_game->>'id')::bigint,
+                        (v_game->'game_modes'->i->>'id')::bigint
+                    )
+                    ON CONFLICT (game_id, mode_id) DO NOTHING;
+                END LOOP;
+            END IF;
+            
+            -- Store genres relationships if they exist
+            IF v_game ? 'genres' AND jsonb_array_length(v_game->'genres') > 0 THEN
+                FOR i IN 0..jsonb_array_length(v_game->'genres')-1 LOOP
+                    -- First ensure the genre exists
+                    INSERT INTO public.genres (
+                        id,
+                        name,
+                        slug
+                    ) VALUES (
+                        (v_game->'genres'->i->>'id')::bigint,
+                        v_game->'genres'->i->>'name',
+                        v_game->'genres'->i->>'slug'
+                    )
+                    ON CONFLICT (id) DO NOTHING;
+                    
+                    -- Then create the relationship
+                    INSERT INTO public.game_to_genres (
+                        game_id,
+                        genre_id
+                    ) VALUES (
+                        (v_game->>'id')::bigint,
+                        (v_game->'genres'->i->>'id')::bigint
+                    )
+                    ON CONFLICT (game_id, genre_id) DO NOTHING;
+                END LOOP;
+            END IF;
+            
+            -- Store platforms relationships if they exist
+            IF v_game ? 'platforms' AND jsonb_array_length(v_game->'platforms') > 0 THEN
+                FOR i IN 0..jsonb_array_length(v_game->'platforms')-1 LOOP
+                    -- First ensure the platform exists
+                    INSERT INTO public.platforms (
+                        id,
+                        name,
+                        slug
+                    ) VALUES (
+                        (v_game->'platforms'->i->>'id')::bigint,
+                        v_game->'platforms'->i->>'name',
+                        v_game->'platforms'->i->>'slug'
+                    )
+                    ON CONFLICT (id) DO NOTHING;
+                    
+                    -- Then create the relationship
+                    INSERT INTO public.game_to_platforms (
+                        game_id,
+                        platform_id
+                    ) VALUES (
+                        (v_game->>'id')::bigint,
+                        (v_game->'platforms'->i->>'id')::bigint
+                    )
+                    ON CONFLICT (game_id, platform_id) DO NOTHING;
+                END LOOP;
+            END IF;
+            
+            -- Handle game_type (single object) if it exists
+            IF v_game ? 'game_type' THEN
+                -- First ensure the type exists
+                INSERT INTO public.types (
+                    id,
+                    type
+                ) VALUES (
+                    (v_game->'game_type'->>'id')::bigint,
+                    v_game->'game_type'->>'type'
+                )
+                ON CONFLICT (id) DO NOTHING;
+                
+                -- Then create the relationship
+                INSERT INTO public.game_to_types (
+                    game_id,
+                    type_id
+                ) VALUES (
+                    (v_game->>'id')::bigint,
+                    (v_game->'game_type'->>'id')::bigint
+                )
+                ON CONFLICT (game_id, type_id) DO NOTHING;
+            END IF;
+            
+            -- Store game types relationships if they exist
+            IF v_game ? 'game_types' AND jsonb_array_length(v_game->'game_types') > 0 THEN
+                FOR i IN 0..jsonb_array_length(v_game->'game_types')-1 LOOP
+                    -- First ensure the type exists
+                    INSERT INTO public.types (
+                        id,
+                        type
+                    ) VALUES (
+                        (v_game->'game_types'->i->>'id')::bigint,
+                        v_game->'game_types'->i->>'type'
+                    )
+                    ON CONFLICT (id) DO NOTHING;
+                    
+                    -- Then create the relationship
+                    INSERT INTO public.game_to_types (
+                        game_id,
+                        type_id
+                    ) VALUES (
+                        (v_game->>'id')::bigint,
+                        (v_game->'game_types'->i->>'id')::bigint
+                    )
+                    ON CONFLICT (game_id, type_id) DO NOTHING;
+                END LOOP;
+            END IF;
                 
             -- Archive the message
             PERFORM pgmq.archive(v_queue_name, v_msg.msg_id);

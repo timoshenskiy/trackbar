@@ -95,7 +95,7 @@ export const searchIGDB = async (
              cover.url, cover.width, cover.height, screenshots.url, screenshots.width, screenshots.height,
              websites.type.id, websites.type.type, websites.url, websites.trusted, 
              game_modes.name, game_modes.slug, total_rating, similar_games, storyline, summary,
-             url, involved_companies.company.name, involved_companies.company.slug,
+             involved_companies.company.name, involved_companies.company.slug,
              game_type.id, game_type.type;
       limit 10;
     `;
