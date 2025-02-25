@@ -11,6 +11,7 @@ CREATE OR REPLACE FUNCTION public.enqueue_game(
 ) RETURNS bigint
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
     v_game_id bigint;
@@ -49,6 +50,7 @@ CREATE OR REPLACE FUNCTION public.dequeue_games(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 BEGIN
     RETURN QUERY 
@@ -66,6 +68,7 @@ CREATE OR REPLACE FUNCTION public.archive_game_message(
 ) RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 BEGIN
     PERFORM pgmq.archive(p_queue_name, p_msg_id);
