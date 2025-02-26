@@ -32,6 +32,296 @@ export type Database = {
       [_ in never]: never
     }
   }
+  pgmq: {
+    Tables: {
+      a_game_store_queue: {
+        Row: {
+          archived_at: string
+          enqueued_at: string
+          message: Json | null
+          msg_id: number
+          read_ct: number
+          vt: string
+        }
+        Insert: {
+          archived_at?: string
+          enqueued_at?: string
+          message?: Json | null
+          msg_id: number
+          read_ct?: number
+          vt: string
+        }
+        Update: {
+          archived_at?: string
+          enqueued_at?: string
+          message?: Json | null
+          msg_id?: number
+          read_ct?: number
+          vt?: string
+        }
+        Relationships: []
+      }
+      meta: {
+        Row: {
+          created_at: string
+          is_partitioned: boolean
+          is_unlogged: boolean
+          queue_name: string
+        }
+        Insert: {
+          created_at?: string
+          is_partitioned: boolean
+          is_unlogged: boolean
+          queue_name: string
+        }
+        Update: {
+          created_at?: string
+          is_partitioned?: boolean
+          is_unlogged?: boolean
+          queue_name?: string
+        }
+        Relationships: []
+      }
+      q_game_store_queue: {
+        Row: {
+          enqueued_at: string
+          message: Json | null
+          msg_id: number
+          read_ct: number
+          vt: string
+        }
+        Insert: {
+          enqueued_at?: string
+          message?: Json | null
+          msg_id?: never
+          read_ct?: number
+          vt: string
+        }
+        Update: {
+          enqueued_at?: string
+          message?: Json | null
+          msg_id?: never
+          read_ct?: number
+          vt?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      _belongs_to_pgmq: {
+        Args: {
+          table_name: string
+        }
+        Returns: boolean
+      }
+      _ensure_pg_partman_installed: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      _get_partition_col: {
+        Args: {
+          partition_interval: string
+        }
+        Returns: string
+      }
+      _get_pg_partman_major_version: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      _get_pg_partman_schema: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      archive:
+        | {
+            Args: {
+              queue_name: string
+              msg_id: number
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              queue_name: string
+              msg_ids: number[]
+            }
+            Returns: number[]
+          }
+      convert_archive_partitioned: {
+        Args: {
+          table_name: string
+          partition_interval?: string
+          retention_interval?: string
+          leading_partition?: number
+        }
+        Returns: undefined
+      }
+      create: {
+        Args: {
+          queue_name: string
+        }
+        Returns: undefined
+      }
+      create_non_partitioned: {
+        Args: {
+          queue_name: string
+        }
+        Returns: undefined
+      }
+      create_partitioned: {
+        Args: {
+          queue_name: string
+          partition_interval?: string
+          retention_interval?: string
+        }
+        Returns: undefined
+      }
+      create_unlogged: {
+        Args: {
+          queue_name: string
+        }
+        Returns: undefined
+      }
+      delete:
+        | {
+            Args: {
+              queue_name: string
+              msg_id: number
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              queue_name: string
+              msg_ids: number[]
+            }
+            Returns: number[]
+          }
+      detach_archive: {
+        Args: {
+          queue_name: string
+        }
+        Returns: undefined
+      }
+      drop_queue: {
+        Args: {
+          queue_name: string
+          partitioned?: boolean
+        }
+        Returns: boolean
+      }
+      format_table_name: {
+        Args: {
+          queue_name: string
+          prefix: string
+        }
+        Returns: string
+      }
+      list_queues: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["pgmq"]["CompositeTypes"]["queue_record"][]
+      }
+      metrics: {
+        Args: {
+          queue_name: string
+        }
+        Returns: Database["pgmq"]["CompositeTypes"]["metrics_result"]
+      }
+      metrics_all: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["pgmq"]["CompositeTypes"]["metrics_result"][]
+      }
+      pop: {
+        Args: {
+          queue_name: string
+        }
+        Returns: Database["pgmq"]["CompositeTypes"]["message_record"][]
+      }
+      purge_queue: {
+        Args: {
+          queue_name: string
+        }
+        Returns: number
+      }
+      read: {
+        Args: {
+          queue_name: string
+          vt: number
+          qty: number
+        }
+        Returns: Database["pgmq"]["CompositeTypes"]["message_record"][]
+      }
+      read_with_poll: {
+        Args: {
+          queue_name: string
+          vt: number
+          qty: number
+          max_poll_seconds?: number
+          poll_interval_ms?: number
+        }
+        Returns: Database["pgmq"]["CompositeTypes"]["message_record"][]
+      }
+      send: {
+        Args: {
+          queue_name: string
+          msg: Json
+          delay?: number
+        }
+        Returns: number[]
+      }
+      send_batch: {
+        Args: {
+          queue_name: string
+          msgs: Json[]
+          delay?: number
+        }
+        Returns: number[]
+      }
+      set_vt: {
+        Args: {
+          queue_name: string
+          msg_id: number
+          vt: number
+        }
+        Returns: Database["pgmq"]["CompositeTypes"]["message_record"][]
+      }
+      validate_queue_name: {
+        Args: {
+          queue_name: string
+        }
+        Returns: undefined
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      message_record: {
+        msg_id: number | null
+        read_ct: number | null
+        enqueued_at: string | null
+        vt: string | null
+        message: Json | null
+      }
+      metrics_result: {
+        queue_name: string | null
+        queue_length: number | null
+        newest_msg_age_sec: number | null
+        oldest_msg_age_sec: number | null
+        total_messages: number | null
+        scrape_time: string | null
+      }
+      queue_record: {
+        queue_name: string | null
+        is_partitioned: boolean | null
+        is_unlogged: boolean | null
+        created_at: string | null
+      }
+    }
+  }
   public: {
     Tables: {
       covers: {
@@ -45,7 +335,7 @@ export type Database = {
         Insert: {
           game_id?: number | null
           height?: number | null
-          id: number
+          id?: number
           url: string
           width?: number | null
         }
@@ -73,7 +363,7 @@ export type Database = {
           slug: string
         }
         Insert: {
-          id: number
+          id?: number
           name: string
           slug: string
         }
@@ -206,8 +496,8 @@ export type Database = {
       }
       games: {
         Row: {
-          created_at: number | null
-          first_release_date: number | null
+          created_at: string | null
+          first_release_date: string | null
           id: number
           involved_companies: string | null
           is_popular: boolean | null
@@ -221,9 +511,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          created_at?: number | null
-          first_release_date?: number | null
-          id: number
+          created_at?: string | null
+          first_release_date?: string | null
+          id?: number
           involved_companies?: string | null
           is_popular?: boolean | null
           keywords?: string | null
@@ -236,8 +526,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          created_at?: number | null
-          first_release_date?: number | null
+          created_at?: string | null
+          first_release_date?: string | null
           id?: number
           involved_companies?: string | null
           is_popular?: boolean | null
@@ -259,7 +549,7 @@ export type Database = {
           slug: string
         }
         Insert: {
-          id: number
+          id?: number
           name: string
           slug: string
         }
@@ -301,7 +591,7 @@ export type Database = {
           slug: string
         }
         Insert: {
-          id: number
+          id?: number
           name: string
           slug: string
         }
@@ -309,36 +599,6 @@ export type Database = {
           id?: number
           name?: string
           slug?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string | null
-          full_name: string | null
-          handle: string | null
-          id: string
-          updated_at: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          handle?: string | null
-          id: string
-          updated_at?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          handle?: string | null
-          id?: string
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -353,7 +613,7 @@ export type Database = {
         Insert: {
           game_id?: number | null
           height?: number | null
-          id: number
+          id?: number
           url: string
           width?: number | null
         }
@@ -380,7 +640,7 @@ export type Database = {
           type: string
         }
         Insert: {
-          id: number
+          id?: number
           type: string
         }
         Update: {
@@ -491,7 +751,7 @@ export type Database = {
           type: string
         }
         Insert: {
-          id: number
+          id?: number
           type: string
         }
         Update: {
@@ -510,7 +770,7 @@ export type Database = {
         }
         Insert: {
           game_id?: number | null
-          id: number
+          id?: number
           trusted?: boolean | null
           type_id?: number | null
           url: string
@@ -544,11 +804,56 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      archive_game_message: {
+        Args: {
+          p_queue_name: string
+          p_msg_id: number
+        }
+        Returns: undefined
+      }
+      check_queue_status: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          queue_name: string
+          active_messages: number
+          archived_messages: number
+          deadletter_messages: number
+        }[]
+      }
+      dequeue_games: {
+        Args: {
+          p_queue_name: string
+          p_count?: number
+          p_visibility_timeout?: number
+        }
+        Returns: {
+          msg_id: number
+          read_ct: number
+          enqueued_at: string
+          vt: string
+          message: Json
+        }[]
+      }
+      enqueue_game: {
+        Args: {
+          p_queue_name: string
+          p_message: Json
+        }
+        Returns: number
+      }
       get_user_by_username: {
         Args: {
           p_username: string
         }
         Returns: Json
+      }
+      process_game_queue: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      trigger_process_game_queue: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
