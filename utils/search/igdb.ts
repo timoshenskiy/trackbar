@@ -110,7 +110,6 @@ export const searchIGDB = async (
     }
 
     const data = (await response.json()) as IGDBGameResponse[];
-    console.log("IGDB response:", data);
 
     return data.map((game: IGDBGameResponse) => ({
       ...game,

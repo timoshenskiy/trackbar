@@ -120,7 +120,7 @@ CREATE TABLE user_games (
     user_id UUID REFERENCES auth.users(id),
     game_id BIGINT REFERENCES games(id),
     status game_status NOT NULL,
-    rating INTEGER CHECK (rating >= 0 AND rating <= 10),
+    rating DECIMAL(3,1) CHECK (rating >= 0 AND rating <= 10),
     review TEXT,
     platform_id BIGINT REFERENCES platforms(id),
     source game_source NOT NULL,
@@ -191,14 +191,28 @@ ALTER TABLE public.genres ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.website_types ENABLE ROW LEVEL SECURITY;
 
--- Users can only read/write their own data
--- Users can only read/write their own data
-CREATE POLICY "Users can manage their own games" ON user_games
-    FOR ALL USING ((select auth.uid()) = user_id);
+-- Update the RLS policy for user_games to allow public read access
+DROP POLICY IF EXISTS "Users can manage their own games" ON user_games;
 
+-- Allow anyone to read user games
+CREATE POLICY "Anyone can read user games" ON user_games
+    FOR SELECT USING (true);
+
+-- Allow users to manage only their own games for write operations
+CREATE POLICY "Users can insert their own games" ON user_games
+    FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Users can update their own games" ON user_games
+    FOR UPDATE USING ((select auth.uid()) = user_id);
+
+CREATE POLICY "Users can delete their own games" ON user_games
+    FOR DELETE USING ((select auth.uid()) = user_id);
+
+-- Users can only manage their own platform connections
 CREATE POLICY "Users can manage their own platform connections" ON user_platform_connections
     FOR ALL USING ((select auth.uid()) = user_id);
 
+-- Users can only manage their ignored games
 CREATE POLICY "Users can manage their ignored games" ON ignored_platform_games
     FOR ALL USING ((select auth.uid()) = user_id);
 

@@ -7,7 +7,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { endpoint, data } = body;
 
-    // Get the token from our server-side utility
     const accessToken = await getIGDBToken();
 
     const response = await axios.post(

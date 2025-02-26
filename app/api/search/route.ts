@@ -9,13 +9,10 @@ import { searchPostgres } from "@/utils/search/postgres";
 import { searchIGDB } from "@/utils/search/igdb";
 import { createClient } from "@/utils/supabase/server";
 import { deduplicateGames } from "@/utils/search/utils";
-import { getIGDBToken } from "@/utils/igdb/token";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q");
-
-  console.log("Received search request:", { query });
 
   if (!query) {
     return NextResponse.json(

@@ -9,7 +9,7 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-    v_batch_size INTEGER := 25;  -- Number of messages to process in one batch
+    v_batch_size INTEGER := 100;  -- Number of messages to process in one batch
     v_processed INTEGER := 0;
     v_msg RECORD;
     v_game JSONB;
@@ -313,7 +313,7 @@ END $$;
 -- Note: pg_cron runs jobs as the user who created the job (postgres in this case)
 SELECT cron.schedule(
     'process-game-queue',           -- job name
-    '* * * * *',                    -- cron schedule (every minute)
+    '2 seconds',                    -- cron schedule (every 2 seconds)
     $$SELECT public.process_game_queue()$$  -- SQL command to execute
 );
 
