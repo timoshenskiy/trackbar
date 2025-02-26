@@ -43,8 +43,8 @@ export interface GameSearchResult {
   slug: string;
   summary?: string;
   storyline?: string;
-  first_release_date?: number;
-  created_at?: number;
+  first_release_date?: number | string;
+  created_at?: number | string;
   total_rating?: number;
   url?: string;
   cover?: {
@@ -80,24 +80,28 @@ export interface GameSearchResult {
     url: string;
     trusted: boolean;
   }>;
-  involved_companies?: Array<{
-    id: number;
-    company: {
-      id: number;
-      name: string;
-      slug: string;
-    };
-  }>;
+  involved_companies?:
+    | Array<{
+        id: number;
+        company: {
+          id: number;
+          name: string;
+          slug: string;
+        };
+      }>
+    | string;
   game_types?: Array<{
     id: number;
     type: string;
   }>;
   similar_games?: number[];
-  keywords?: Array<{
-    id: number;
-    name: string;
-    slug: string;
-  }>;
+  keywords?:
+    | Array<{
+        id: number;
+        name: string;
+        slug: string;
+      }>
+    | string;
 }
 
 export const setGameSearchCache = async (
