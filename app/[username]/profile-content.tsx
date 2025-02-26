@@ -28,8 +28,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import AddGameModal from "@/components/AddGameModal";
-import GameSearchModal from "@/components/GameSearchModal";
 import { GameSearchResult } from "@/utils/types/game";
+import SearchModal from "@/components/search/search-modal";
 
 interface Genre {
   name: string;
@@ -911,9 +911,14 @@ export function ProfileContent({
         )}
 
         {/* Game Search Modal */}
-        <GameSearchModal
+        <SearchModal
           isOpen={isSearchModalOpen}
           onClose={() => setIsSearchModalOpen(false)}
+          onGameSelect={(game: GameSearchResult) => {
+            setSelectedGame(game);
+            setIsModalOpen(true);
+            setIsSearchModalOpen(false);
+          }}
         />
       </div>
     </div>

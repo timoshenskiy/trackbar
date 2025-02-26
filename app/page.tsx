@@ -1,46 +1,43 @@
 "use client";
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import { Gamepad2, Clock } from "lucide-react";
-import { igdbAdapter } from '@/adapters/igdb';
+import { igdbAdapter } from "@/adapters/igdb";
 import Banner from "@/components/main/banner";
 import ProductFeatures from "@/components/main/product-features";
-import GameSlider from '@/components/main/game-slider';
+import GameSlider from "@/components/main/game-slider";
 import Footer from "@/components/main/footer";
-import Header from '@/components/main/header';
+import Header from "@/components/main/header";
 
 export default function Home() {
-  const { data: token, error: tokenError } = useQuery({
-    queryKey: ['accessToken'],
-    queryFn: igdbAdapter.getAccessToken,
-    retry: 2,
-  });
-
-  const { 
-    data: lastReleasedGames, 
+  const {
+    data: lastReleasedGames,
     error: lastReleasedError,
-    isLoading: isLoadingLastReleased 
+    isLoading: isLoadingLastReleased,
   } = useQuery({
-    queryKey: ['lastReleasedGames', token],
-    queryFn: () => igdbAdapter.getLatestGames(token!),
-    enabled: !!token,
+    queryKey: ["lastReleasedGames"],
+    queryFn: () => igdbAdapter.getLatestGames(),
     retry: 1,
   });
 
-  const { 
-    data: upcomingGames, 
+  const {
+    data: upcomingGames,
     error: upcomingError,
-    isLoading: isLoadingUpcoming 
+    isLoading: isLoadingUpcoming,
   } = useQuery({
-    queryKey: ['upcomingGames', token],
-    queryFn: () => igdbAdapter.getUpcomingGames(token!),
-    enabled: !!token,
+    queryKey: ["upcomingGames"],
+    queryFn: () => igdbAdapter.getUpcomingGames(),
     retry: 1,
   });
 
-  if (tokenError) {
-    console.error('Token error:', tokenError);
-    // Handle token error UI
+  if (lastReleasedError) {
+    console.error("Last released games error:", lastReleasedError);
+    // Handle error UI
+  }
+
+  if (upcomingError) {
+    console.error("Upcoming games error:", upcomingError);
+    // Handle error UI
   }
 
   return (
@@ -54,8 +51,8 @@ export default function Home() {
         icon={<Gamepad2 className="w-6 h-6 text-white" />}
         visibleCount={2}
       />
-      <GameSlider 
-        games={upcomingGames || []} 
+      <GameSlider
+        games={upcomingGames || []}
         direction="left"
         title="Upcoming Games"
         icon={<Clock className="w-6 h-6 text-white" />}
