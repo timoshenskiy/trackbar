@@ -81,8 +81,6 @@ export const searchPostgres = async (
     return [];
   }
 
-  console.log("PostgreSQL results:", games);
-
   // Transform the data to match GameSearchResult interface
   return (games as unknown as DBGame[])
     .map((game): GameSearchResult | undefined => {

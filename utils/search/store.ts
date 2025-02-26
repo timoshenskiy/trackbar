@@ -21,11 +21,8 @@ export const storeIGDBResults = async (games: GameSearchResult[]) => {
         first_release_date: game.first_release_date,
         created_at: game.created_at,
         total_rating: game.total_rating,
-        // Store involved_companies as string
         involved_companies: game.involved_companies || null,
-        // Store keywords as string
         keywords: game.keywords || null,
-        // Keep similar_games as array
         similar_games: game.similar_games || null,
         updated_at: new Date(),
       },
