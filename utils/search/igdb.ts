@@ -5,8 +5,8 @@
 
 import { GameSearchResult } from "../redis";
 import { getIGDBToken } from "../igdb/token";
+import { convertUnixTimestampToISO } from "../date";
 
-// Define interfaces for IGDB API response types
 interface IGDBWebsite {
   id: number;
   type: string | { id: number; type: string };
@@ -78,7 +78,6 @@ export const searchIGDB = async (
   try {
     console.log("Searching IGDB for:", query);
 
-    // Get the token from our server-side utility
     const accessToken = await getIGDBToken();
 
     const url = "https://api.igdb.com/v4/games";
@@ -113,30 +112,35 @@ export const searchIGDB = async (
     const data = (await response.json()) as IGDBGameResponse[];
     console.log("IGDB response:", data);
 
-    // Transform the data to match the GameSearchResult type
-    return data.map((game: IGDBGameResponse) => {
-      // Process websites to ensure they match the expected format
-      const websites = game.websites?.map((website: IGDBWebsite) => ({
+    return data.map((game: IGDBGameResponse) => ({
+      ...game,
+      first_release_date: convertUnixTimestampToISO(game.first_release_date),
+      created_at: convertUnixTimestampToISO(game.created_at),
+      websites: game.websites?.map((website: IGDBWebsite) => ({
         id: website.id,
         type:
           typeof website.type === "object" ? website.type.type : website.type,
         url: website.url,
         trusted: website.trusted,
-      }));
-
-      return {
-        ...game,
-        websites,
-        game_types: game.game_type
-          ? [
-              {
-                id: game.game_type.id,
-                type: game.game_type.type,
-              },
-            ]
-          : undefined,
-      };
-    });
+      })),
+      keywords: game.keywords
+        ? game.keywords.map((keyword) => keyword.name).join(", ")
+        : undefined,
+      involved_companies: game.involved_companies
+        ? game.involved_companies
+            .map((company) => company.company.name)
+            .join(", ")
+        : undefined,
+      game_types: game.game_type
+        ? [
+            {
+              id: game.game_type.id,
+              type: game.game_type.type,
+            },
+          ]
+        : undefined,
+      isPopular: false,
+    }));
   } catch (error) {
     console.error("IGDB search error:", error);
     return [];

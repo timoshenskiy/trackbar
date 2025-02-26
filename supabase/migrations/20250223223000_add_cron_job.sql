@@ -48,11 +48,11 @@ BEGIN
                 v_game->>'slug',
                 v_game->>'summary',
                 v_game->>'storyline',
-                (v_game->>'first_release_date')::bigint,
-                (v_game->>'created_at')::bigint,
+                (v_game->>'first_release_date')::timestamp with time zone,
+                (v_game->>'created_at')::timestamp with time zone,
                 (v_game->>'total_rating')::decimal,
-                v_game->'involved_companies',
-                v_game->'keywords',
+                v_game->>'involved_companies',
+                v_game->>'keywords',
                 CASE 
                     WHEN v_game ? 'similar_games' AND jsonb_typeof(v_game->'similar_games') = 'array' 
                     THEN (SELECT array_agg(x::bigint) FROM jsonb_array_elements_text(v_game->'similar_games') AS x)
