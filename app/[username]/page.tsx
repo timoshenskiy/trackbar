@@ -32,7 +32,6 @@ export default async function UserProfilePage({
 
   return (
     <div className="min-h-screen bg-quokka-darker text-quokka-light">
-      <Header />
       <div className="flex">
         <Sidebar />
         <ProfileContent
@@ -42,7 +41,6 @@ export default async function UserProfilePage({
           avatarUrl={userData.avatar_url}
         />
       </div>
-      <Footer />
     </div>
   );
 }

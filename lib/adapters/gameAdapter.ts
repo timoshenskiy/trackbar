@@ -1,16 +1,17 @@
-import { Game } from '@/types/game';
+import { Game } from "@/types/game";
+import { notFound } from "next/navigation";
 
 export async function getGameById(id: string): Promise<Game> {
   const response = await fetch(`http://localhost:3000/api/game?id=${id}`);
-  
+
   if (!response.ok) {
-    throw new Error(`Failed to fetch game: ${response.statusText}`);
+    notFound();
   }
 
   const game = await response.json();
 
   if (!game) {
-    throw new Error(`Game with id ${id} not found`);
+    notFound();
   }
 
   return {
