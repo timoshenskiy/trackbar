@@ -194,16 +194,7 @@ export default function AddGameModal({
 
   // The content of the modal
   const ModalContent = () => (
-    <div className={cn("relative p-6", isEmbedded && "pt-12")}>
-      {!isEmbedded && (
-        <button
-          onClick={onClose}
-          className="absolute right-6 top-6 text-gray-400 hover:text-white"
-        >
-          <X className="h-6 w-6" />
-        </button>
-      )}
-
+    <div className={cn("relative p-6")}>
       {/* Game Header */}
       <div className="flex items-center gap-4 mb-8">
         <img
@@ -310,7 +301,7 @@ export default function AddGameModal({
   // Otherwise, wrap in Dialog
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-quokka-dark border-0 text-quokka-light max-w-2xl p-0">
+      <DialogContent className="bg-quokka-darker border border-quokka-purple/20 text-white max-w-2xl p-0 overflow-hidden">
         <ModalContent />
       </DialogContent>
     </Dialog>
