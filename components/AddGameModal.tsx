@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { GameSearchResult } from "@/utils/types/game";
 import { createClient } from "@/utils/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAddUserGame, useUpdateUserGame } from "@/hooks/useUserGames";
 
 interface AddGameModalProps {
   isOpen: boolean;
@@ -37,10 +38,19 @@ export default function AddGameModal({
   >("Want");
   const [rating, setRating] = useState<number>(0);
   const [review, setReview] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+
+  // Use our custom hooks
+  const addGameMutation = useAddUserGame();
+  const updateGameMutation = useUpdateUserGame(
+    isEditing && game.userGameId ? String(game.userGameId) : ""
+  );
+
+  // Determine if we're in a submitting state
+  const isSubmitting =
+    addGameMutation.isPending || updateGameMutation.isPending;
 
   // Initialize with existing data if editing
   useEffect(() => {
@@ -133,62 +143,40 @@ export default function AddGameModal({
 
   const handleSubmit = async () => {
     try {
-      setIsSubmitting(true);
-      const supabase = createClient();
-
-      // Get the current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error("Not authenticated");
-      }
-
       // Convert status to database enum format
-      const dbStatus = status.toLowerCase() as
-        | "finished"
-        | "playing"
-        | "dropped"
-        | "want_to_play";
+      const dbStatus =
+        status === "Want"
+          ? "want_to_play"
+          : (status.toLowerCase() as
+              | "finished"
+              | "playing"
+              | "dropped"
+              | "want_to_play");
 
       if (isEditing && game.userGameId) {
-        // Update existing game
-        const { error } = await supabase
-          .from("user_games")
-          .update({
-            status: dbStatus,
-            rating: Math.round(rating * 10), // Convert to 0-100 range for storage
-            review: review,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", game.userGameId);
-
-        if (error) throw error;
-      } else {
-        // Add new game
-        const { error } = await supabase.from("user_games").insert({
-          user_id: user.id,
-          game_id: game.id,
+        // Update existing game using the mutation
+        await updateGameMutation.mutateAsync({
           status: dbStatus,
           rating: Math.round(rating * 10), // Convert to 0-100 range for storage
           review: review,
-          source: "manual",
-          platform_id: game.platforms?.[0]?.id, // Use first platform as default
         });
-
-        if (error) throw error;
+      } else {
+        // Add new game using the mutation
+        await addGameMutation.mutateAsync({
+          gameId: game.id,
+          status: dbStatus,
+          rating: Math.round(rating * 10), // Convert to 0-100 range for storage
+          review: review,
+          platformId: game.platforms?.[0]?.id || 0, // Use first platform as default
+          source: "manual",
+          gameDetails: game,
+        });
       }
-
-      // Invalidate the userGames query to trigger a refresh
-      queryClient.invalidateQueries({ queryKey: ["userGames"] });
 
       onSuccess();
     } catch (error) {
       console.error("Error saving game:", error);
       // TODO: Show error toast
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -287,8 +275,8 @@ export default function AddGameModal({
             ? "Updating game..."
             : "Adding game..."
           : isEditing
-          ? "Update game"
-          : "Add game"}
+            ? "Update game"
+            : "Add game"}
       </button>
     </div>
   );
