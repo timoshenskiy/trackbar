@@ -86,7 +86,19 @@ async function fetchUserGames(
     .select(
       `
       *,
-      games:game_id(id, name, slug, summary, first_release_date, total_rating),
+      games:game_id(id, name, cover:covers (
+              url
+            ),
+            game_to_genres (
+              genres (
+                name
+              )
+            ),
+            game_to_platforms (
+              platforms (
+                name
+              )
+            ), slug, summary, first_release_date, total_rating),
       platforms:platform_id(id, name, slug)
     `
     )

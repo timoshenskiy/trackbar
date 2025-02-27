@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
-import { ProfileContent } from "./profile-content";
+import { ProfileContent } from "./components/ProfileContent";
 import { getServerUser } from "@/utils/supabase/server-auth";
 
 interface UserData {
