@@ -2,19 +2,12 @@ import { notFound } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
 import { ProfileContent } from "./profile-content";
-import Sidebar from "@/components/Sidebar";
 import { getServerUser } from "@/utils/supabase/server-auth";
 
 interface UserData {
   username: string;
   full_name: string;
   avatar_url: string;
-}
-
-interface PageProps {
-  params: Promise<{
-    username: string;
-  }>;
 }
 
 export default async function UserProfilePage({
@@ -38,16 +31,11 @@ export default async function UserProfilePage({
   const isOwnProfile = currentUser?.user_metadata?.username === username;
 
   return (
-    <div className="min-h-screen bg-quokka-darker text-quokka-light">
-      <div className="flex">
-        <Sidebar />
-        <ProfileContent
-          isOwnProfile={isOwnProfile}
-          username={typedUserData.username}
-          fullName={typedUserData.full_name}
-          avatarUrl={typedUserData.avatar_url}
-        />
-      </div>
-    </div>
+    <ProfileContent
+      isOwnProfile={isOwnProfile}
+      username={typedUserData.username}
+      fullName={typedUserData.full_name}
+      avatarUrl={typedUserData.avatar_url}
+    />
   );
 }
