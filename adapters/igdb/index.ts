@@ -80,4 +80,23 @@ export const igdbAdapter = {
       return []; // This line will never be reached due to handleIGDBError throwing, but satisfies TypeScript
     }
   },
+
+  getPopularGames: async (): Promise<IGDBGame[]> => {
+    try {
+      const response = await axiosInstance.post("/games", {
+        endpoint: "games",
+        data: `fields name, cover.url, first_release_date, rating, total_rating, summary, 
+               genres.name, platforms.name, screenshots.url, videos.video_id, 
+               involved_companies.company.name, slug;
+               sort total_rating desc;
+               where total_rating != null & cover != null;
+               limit 20;`,
+      });
+
+      return response.data;
+    } catch (error) {
+      handleIGDBError(error as AxiosError);
+      return []; // This line will never be reached due to handleIGDBError throwing, but satisfies TypeScript
+    }
+  },
 };
