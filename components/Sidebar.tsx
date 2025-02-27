@@ -1,63 +1,32 @@
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import {
-  Home,
-  Gamepad2,
-  Users,
-  Settings,
-  Plus,
-  Trophy,
-  Flame,
-  Heart,
-} from "lucide-react";
-import { getServerUser } from "@/utils/supabase/server-auth";
+import { Home, Gamepad2, Settings, Plus, LogOut } from "lucide-react";
+
 import { Button } from "./ui/button";
+import SidebarLink from "./SidebarLink";
+
+import { getServerUser } from "@/utils/supabase/server-auth";
+import { signOutAction } from "@/app/actions";
 
 const Sidebar = async () => {
   const user = await getServerUser();
 
   const navigation = [
-    { name: "Home", href: "/", icon: Home, description: "Dashboard" },
+    { name: "Home", href: "/", iconName: "Home", description: "Dashboard" },
     ...(user
       ? [
           {
             name: "My Games",
             href: `/${user.user_metadata.username}`,
-            icon: Gamepad2,
+            iconName: "Gamepad2",
             description: "Your collection",
+          },
+          {
+            name: "Settings",
+            href: `/${user.user_metadata.username}/settings`,
+            iconName: "Settings",
+            description: "Preferences",
           },
         ]
       : []),
-    {
-      name: "Discover",
-      href: "/discover",
-      icon: Flame,
-      description: "Find new games",
-    },
-    {
-      name: "Trending",
-      href: "/trending",
-      icon: Trophy,
-      description: "Popular now",
-    },
-    {
-      name: "Wishlist",
-      href: "/wishlist",
-      icon: Heart,
-      description: "Games you want",
-    },
-    {
-      name: "Community",
-      href: "/community",
-      icon: Users,
-      description: "Connect with others",
-    },
-    {
-      name: "Settings",
-      href: "/settings",
-      icon: Settings,
-      description: "Preferences",
-    },
   ];
 
   return (
@@ -65,40 +34,9 @@ const Sidebar = async () => {
       {/* Main Navigation */}
       <div className="px-3 py-6 flex-1 overflow-y-auto scrollbar-hide">
         <nav className="space-y-1.5">
-          {navigation.map((item) => {
-            const isActive =
-              item.href === `/${user?.user_metadata.username}` && user;
-
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative overflow-hidden",
-                  isActive
-                    ? "text-quokka-cyan bg-quokka-purple/10 border-l-2 border-quokka-cyan"
-                    : "text-quokka-light/60 hover:text-quokka-light hover:bg-quokka-purple/5"
-                )}
-              >
-                <div
-                  className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-                    isActive
-                      ? "bg-quokka-purple/20 text-quokka-cyan"
-                      : "text-quokka-light/40 group-hover:text-quokka-cyan"
-                  )}
-                >
-                  <item.icon className="w-5 h-5" />
-                </div>
-                <span className="hidden md:block">{item.name}</span>
-
-                {/* Tooltip for mobile view */}
-                <div className="absolute left-full ml-2 px-2 py-1 bg-quokka-dark text-quokka-light text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 md:hidden">
-                  {item.name}
-                </div>
-              </Link>
-            );
-          })}
+          {navigation.map((item) => (
+            <SidebarLink key={item.name} item={item} />
+          ))}
         </nav>
       </div>
 
@@ -128,6 +66,18 @@ const Sidebar = async () => {
               </div>
             </div>
           </div>
+
+          {/* Sign Out Button */}
+          <form action={signOutAction} className="mt-2">
+            <Button
+              type="submit"
+              variant="ghost"
+              className="w-full text-quokka-light/60 hover:text-quokka-light hover:bg-quokka-purple/10 flex items-center gap-2 py-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden md:block">Sign out</span>
+            </Button>
+          </form>
         </div>
       )}
     </div>
