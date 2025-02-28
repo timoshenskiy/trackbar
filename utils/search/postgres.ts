@@ -5,13 +5,22 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { DBGame, GameSearchResult } from "../types/game";
+import { MAIN_GAME_TYPES } from "./igdb";
 
 export const searchPostgres = async (
-  query: string
+  query: string,
+  showOnlyGames: boolean = true
 ): Promise<GameSearchResult[]> => {
   const supabase = await createClient();
-  console.log("Searching PostgreSQL for:", query);
-  const { data: games, error } = await supabase
+  console.log(
+    "Searching PostgreSQL for:",
+    query,
+    "showOnlyGames:",
+    showOnlyGames
+  );
+
+  // Start building the query
+  let postgresQuery = supabase
     .from("games")
     .select(
       `
@@ -73,15 +82,19 @@ export const searchPostgres = async (
       )
     `
     )
-    .ilike("name", `%${query}%`)
-    .limit(10);
+    .ilike("name", `%${query}%`);
+
+  if (showOnlyGames) {
+    postgresQuery = postgresQuery.in("game_type", MAIN_GAME_TYPES);
+  }
+
+  const { data: games, error } = await postgresQuery.limit(30);
 
   if (error) {
     console.error("PostgreSQL search error:", error);
     return [];
   }
 
-  // Transform the data to match GameSearchResult interface
   return (games as unknown as DBGame[])
     .map((game): GameSearchResult | undefined => {
       try {

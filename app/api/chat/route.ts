@@ -31,6 +31,12 @@ const searchGamesFunction = {
         type: "string",
         description: "User's review or comments about the game",
       },
+      showOnlyGames: {
+        type: "boolean",
+        description:
+          "Whether to show only main games (true) or include DLCs and other content (false)",
+        default: true,
+      },
     },
     required: ["query"],
   },
@@ -38,7 +44,7 @@ const searchGamesFunction = {
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, showOnlyGames = true } = await req.json();
 
     // Call OpenAI with function calling
     const response = await openai.chat.completions.create({
@@ -74,14 +80,25 @@ export async function POST(req: Request) {
       const userRating = functionArgs.rating;
       const userStatus = functionArgs.status;
       const userReview = functionArgs.review;
+      // Get showOnlyGames from function args or use the value from request
+      const userShowOnlyGames =
+        functionArgs.showOnlyGames !== undefined
+          ? functionArgs.showOnlyGames
+          : showOnlyGames;
 
       // Use the actual search API endpoint to benefit from caching and game enqueueing
-      console.log("Calling search API with query:", query);
+      console.log(
+        "Calling search API with query:",
+        query,
+        "showOnlyGames:",
+        userShowOnlyGames
+      );
       const searchUrl = new URL(
         "/api/search",
         process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
       );
       searchUrl.searchParams.append("q", query);
+      searchUrl.searchParams.append("showOnlyGames", String(userShowOnlyGames));
 
       // Make the request to the search API
       const searchResponse = await axios.get(searchUrl.toString());
@@ -93,8 +110,8 @@ export async function POST(req: Request) {
       let assistantResponse;
 
       if (shouldShowMultipleResults) {
-        // Limit to top 8 results to avoid overwhelming the user but show enough options
-        const topResults = searchResults.slice(0, 8);
+        // Use all results without limiting to a specific number
+        const topResults = searchResults;
 
         // Create a response with multiple game options
         assistantResponse = {
@@ -112,6 +129,7 @@ export async function POST(req: Request) {
             role: assistantResponse.role,
             content: assistantResponse.content,
             gameCount: topResults.length,
+            showOnlyGames: userShowOnlyGames,
           })
         );
       } else if (searchResults.length > 0) {
@@ -163,6 +181,7 @@ export async function POST(req: Request) {
             userRating,
             userStatus,
             userReview,
+            showOnlyGames: userShowOnlyGames,
           })
         );
       } else {

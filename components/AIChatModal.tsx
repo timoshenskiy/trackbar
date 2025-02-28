@@ -3,12 +3,21 @@
 import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Bot, User, Send, Loader2 } from "lucide-react";
+import { Bot, User, Send, Loader2, Filter } from "lucide-react";
 import { GameSearchResult } from "@/utils/types/game";
 import GameResult from "./chat/GameResult";
 import GameResultsList from "./chat/GameResultsList";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface AIChatModalProps {
   isOpen: boolean;
@@ -32,6 +41,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [showOnlyGames, setShowOnlyGames] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastGameMentionedRef = useRef<number | null>(null);
 
@@ -94,6 +104,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         messages: messages
           .concat(userMessage)
           .map(({ role, content }) => ({ role, content })),
+        showOnlyGames, // Pass the filter preference to the API
       });
 
       // Get assistant response
@@ -257,13 +268,53 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     }
   };
 
+  // Handle filter toggle change
+  const handleFilterChange = (checked: boolean) => {
+    setShowOnlyGames(checked);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-quokka-darker border border-quokka-purple/20 text-white max-w-2xl p-0 h-[80vh] flex flex-col overflow-hidden">
-        <div className="p-4 border-b border-quokka-purple/20 flex items-center">
+        <div className="p-4 border-b border-quokka-purple/20 flex items-center justify-between">
           <DialogTitle className="text-xl font-bold text-white">
             Game Assistant
           </DialogTitle>
+
+          {/* Game Type Filter Toggle - Compact in header */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2 bg-quokka-dark/80 hover:bg-quokka-dark/90 transition-colors px-3 py-1.5 rounded-full border border-quokka-purple/40 mr-6 w-[140px] justify-between">
+                  <Filter className="h-3.5 w-3.5 text-quokka-cyan" />
+                  <Switch
+                    id="game-filter"
+                    checked={showOnlyGames}
+                    onCheckedChange={handleFilterChange}
+                    className="data-[state=checked]:bg-quokka-purple/40 data-[state=unchecked]:bg-quokka-purple/40 [&>span]:bg-quokka-cyan"
+                  />
+                  <span
+                    className={cn(
+                      "text-xs font-medium py-0 min-w-[70px] text-center",
+                      showOnlyGames ? "text-quokka-cyan" : "text-quokka-light"
+                    )}
+                  >
+                    {showOnlyGames ? "Games only" : "All types"}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="bg-quokka-dark border-quokka-purple/30 text-quokka-light"
+              >
+                <p className="text-xs max-w-[250px]">
+                  {showOnlyGames
+                    ? "Showing only Main Games, Remakes, Remasters, and Expanded Games"
+                    : "Showing all content including DLCs, Expansions, Bundles, etc."}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Chat Messages */}
@@ -277,6 +328,18 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
               <p className="text-sm mt-2">
                 Try saying something like "I played Baldur's Gate 3 and finished
                 it yesterday, I give it 8/10"
+              </p>
+
+              {/* Filter info for empty state - simplified to just text */}
+              <p className="mt-6 text-xs text-quokka-light bg-quokka-dark/40 py-1.5 px-3 rounded-full inline-flex items-center gap-1.5">
+                <Filter className="h-3.5 w-3.5 text-quokka-cyan" />
+                <span
+                  className={
+                    showOnlyGames ? "text-quokka-cyan" : "text-quokka-light"
+                  }
+                >
+                  Filter: {showOnlyGames ? "Games only" : "All game types"}
+                </span>
               </p>
             </div>
           ) : (

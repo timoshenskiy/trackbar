@@ -7,6 +7,9 @@ import { GameSearchResult } from "../redis";
 import { getIGDBToken } from "../igdb/token";
 import { convertUnixTimestampToISO } from "../date";
 
+// Define main game types (Main Game, Remake, Remaster)
+export const MAIN_GAME_TYPES = [0, 8, 9];
+
 interface IGDBWebsite {
   id: number;
   type: string | { id: number; type: string };
@@ -73,10 +76,11 @@ interface IGDBGameResponse {
 }
 
 export const searchIGDB = async (
-  query: string
+  query: string,
+  showOnlyGames: boolean = true
 ): Promise<GameSearchResult[]> => {
   try {
-    console.log("Searching IGDB for:", query);
+    console.log("Searching IGDB for:", query, "showOnlyGames:", showOnlyGames);
 
     const accessToken = await getIGDBToken();
 
@@ -87,7 +91,8 @@ export const searchIGDB = async (
       "Content-Type": "text/plain",
     };
 
-    const body = `
+    // Build the query body
+    let bodyQuery = `
       search "${query}";
       fields id, name, slug, created_at, genres.name, genres.slug, 
              platforms.name, platforms.slug, first_release_date, keywords.name,
@@ -96,13 +101,19 @@ export const searchIGDB = async (
              game_modes.name, game_modes.slug, total_rating, similar_games, storyline, summary,
              involved_companies.company.name, involved_companies.company.slug,
              game_type.id, game_type.type;
-      limit 10;
     `;
+
+    // Add game type filter if showOnlyGames is true
+    if (showOnlyGames) {
+      bodyQuery += `where game_type = (${MAIN_GAME_TYPES.join(", ")});`;
+    }
+
+    bodyQuery += `limit 50;`;
 
     const response = await fetch(url, {
       method: "POST",
       headers: headers,
-      body,
+      body: bodyQuery,
     });
 
     if (!response.ok) {

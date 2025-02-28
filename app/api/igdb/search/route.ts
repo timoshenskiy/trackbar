@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { IgdbGames } from "./types";
+import { MAIN_GAME_TYPES } from "@/utils/search/igdb";
 
 const clientId = process.env.TWITCH_CLIENT_ID;
 const accessToken = process.env.TWITCH_ACCESS_TOKEN;
@@ -7,6 +8,7 @@ const accessToken = process.env.TWITCH_ACCESS_TOKEN;
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const name = searchParams.get("name");
+  const showOnlyGames = searchParams.get("showOnlyGames") !== "false";
 
   if (!name) {
     return NextResponse.json(
@@ -28,20 +30,29 @@ export async function GET(request: NextRequest) {
     Authorization: `Bearer ${process.env.TWITCH_ACCESS_TOKEN}`,
   };
 
-  const body = `
-    search "${name}";
-    fields id, name, slug, created_at, game_type.type, genres.name, genres.slug, platforms.name, platforms.slug, first_release_date, keywords.name,
+  // Build the query body
+  let bodyQuery = `
+    fuzzy_search "${name}";
+    fields id, name, slug, alternative_names.name, created_at, game_type.type, genres.name, genres.slug, platforms.name, platforms.slug, first_release_date, keywords.name,
            cover.url, cover.width, cover.height, screenshots.url, screenshots.width, screenshots.height,
            websites.type.id, websites.type.type, websites.url, websites.trusted, game_modes, total_rating, similar_games, storyline, summary,
            url, involved_companies.company.name, involved_companies.company.slug, game_modes.name,game_modes.slug;
-    limit 10;
   `;
 
+  // Add game type filter if showOnlyGames is true
+  if (showOnlyGames) {
+    bodyQuery += `where game_type = (${MAIN_GAME_TYPES.join(", ")});`;
+  }
+
+  bodyQuery += `limit 50;`;
+
   try {
+    console.log("IGDB search:", { name, showOnlyGames });
+
     const response = await fetch(url, {
       method: "POST",
       headers: headers,
-      body,
+      body: bodyQuery,
     });
 
     if (!response.ok) {

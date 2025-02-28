@@ -13,6 +13,8 @@ import { deduplicateGames } from "@/utils/search/utils";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q");
+  // Parse showOnlyGames parameter, default to true if not provided or invalid
+  const showOnlyGames = searchParams.get("showOnlyGames") !== "false";
 
   if (!query) {
     return NextResponse.json(
@@ -24,7 +26,9 @@ export async function GET(request: Request) {
   try {
     // Step 1: Check Redis cache
     console.log("Checking Redis cache...");
-    const cachedResults = await getGameSearchCache(query);
+    // Include showOnlyGames in the cache key to ensure different results are cached separately
+    const cacheKey = `${query}:${showOnlyGames}`;
+    const cachedResults = await getGameSearchCache(cacheKey);
     if (cachedResults) {
       console.log("Cache hit! Returning cached results");
       return NextResponse.json(cachedResults);
@@ -34,13 +38,14 @@ export async function GET(request: Request) {
     // Step 2: Parallel search in PostgreSQL and IGDB
     console.log("Starting parallel search...");
     const [postgresResults, igdbResults] = await Promise.all([
-      searchPostgres(query),
-      searchIGDB(query),
+      searchPostgres(query, showOnlyGames),
+      searchIGDB(query, showOnlyGames),
     ]);
 
     console.log("Search results:", {
       postgresResultsCount: postgresResults.length,
       igdbResultsCount: igdbResults.length,
+      showOnlyGames,
     });
 
     // Step 3: Merge and deduplicate results
@@ -48,7 +53,7 @@ export async function GET(request: Request) {
     console.log("Total deduplicated results:", allResults.length);
 
     // Step 4: Cache the results
-    await setGameSearchCache(query, allResults);
+    await setGameSearchCache(cacheKey, allResults);
 
     // Step 5: Store IGDB results in PostgreSQL using PGMQ
     if (igdbResults.length > 0) {
