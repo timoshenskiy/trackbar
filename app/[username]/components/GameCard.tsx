@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, Trophy, Gamepad2, Pencil, Star } from "lucide-react";
+import { Clock, Trophy, Gamepad2, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export interface Game {
@@ -50,33 +50,22 @@ export function GameCard({
     }
   };
 
-  // Get rating stars
-  const getRatingStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+  // Get rating color based on score
+  const getRatingColor = (rating: number) => {
+    if (rating >= 8)
+      return "bg-green-500/20 text-green-400 border-green-500/30";
+    if (rating >= 6) return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    if (rating >= 4)
+      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+    if (rating > 0) return "bg-red-500/20 text-red-400 border-red-500/30";
+    return "bg-quokka-dark/50 text-quokka-light/40 border-quokka-light/10";
+  };
 
-    return (
-      <div className="flex">
-        {[...Array(fullStars)].map((_, i) => (
-          <Star
-            key={`full-${i}`}
-            className="w-4 h-4 fill-yellow-400 text-yellow-400"
-          />
-        ))}
-        {hasHalfStar && (
-          <div className="relative w-4 h-4">
-            <Star className="absolute w-4 h-4 text-yellow-400" />
-            <div className="absolute w-2 h-4 overflow-hidden">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            </div>
-          </div>
-        )}
-        {[...Array(emptyStars)].map((_, i) => (
-          <Star key={`empty-${i}`} className="w-4 h-4 text-yellow-400/30" />
-        ))}
-      </div>
-    );
+  // Format rating display
+  const formatRating = (rating: number) => {
+    // Ensure rating is a valid number between 0 and 10
+    const validRating = Math.max(0, Math.min(10, rating || 0));
+    return validRating.toFixed(1);
   };
 
   if (viewMode === "grid") {
@@ -103,7 +92,11 @@ export function GameCard({
             <div className="w-20 h-28 rounded-lg overflow-hidden bg-quokka-dark/50 flex-shrink-0">
               {game.cover ? (
                 <img
-                  src={`https:${game.cover.replace("t_thumb", "t_cover_big")}`}
+                  src={
+                    game.cover.startsWith("//")
+                      ? `https:${game.cover.replace("t_thumb", "t_cover_big")}`
+                      : game.cover.replace("t_thumb", "t_cover_big")
+                  }
                   alt={game.title}
                   className="w-full h-full object-cover"
                 />
@@ -129,23 +122,31 @@ export function GameCard({
                 {game.platform}
               </div>
 
-              <div className="mt-2 flex items-center gap-1">
-                {getRatingStars(game.rating)}
-                <span className="text-xs text-quokka-light/40 ml-1">
-                  {game.rating.toFixed(1)}
-                </span>
+              <div className="mt-2">
+                {game.rating > 0 ? (
+                  <Badge
+                    className={`${getRatingColor(game.rating)} text-xs px-2 py-1 font-medium`}
+                  >
+                    {formatRating(game.rating)}
+                  </Badge>
+                ) : (
+                  <span className="text-xs text-quokka-light/40">
+                    Not rated
+                  </span>
+                )}
               </div>
 
               <div className="mt-3 flex flex-wrap gap-1">
-                {game.genres.slice(0, 2).map((genre: string) => (
-                  <span
-                    key={genre}
-                    className="px-2 py-0.5 bg-quokka-dark/50 rounded-full text-xs text-quokka-light/60"
-                  >
-                    {genre}
-                  </span>
-                ))}
-                {game.genres.length > 2 && (
+                {game.genres &&
+                  game.genres.slice(0, 2).map((genre: string) => (
+                    <span
+                      key={genre}
+                      className="px-2 py-0.5 bg-quokka-dark/50 rounded-full text-xs text-quokka-light/60"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                {game.genres && game.genres.length > 2 && (
                   <span className="px-2 py-0.5 bg-quokka-dark/50 rounded-full text-xs text-quokka-light/60">
                     +{game.genres.length - 2}
                   </span>
@@ -203,7 +204,11 @@ export function GameCard({
           <div className="w-24 h-32 rounded-lg overflow-hidden bg-quokka-dark/50 flex-shrink-0">
             {game.cover ? (
               <img
-                src={`https:${game.cover.replace("t_thumb", "t_cover_big")}`}
+                src={
+                  game.cover.startsWith("//")
+                    ? `https:${game.cover.replace("t_thumb", "t_cover_big")}`
+                    : game.cover.replace("t_thumb", "t_cover_big")
+                }
                 alt={game.title}
                 className="w-full h-full object-cover"
               />
@@ -227,27 +232,30 @@ export function GameCard({
                   <span>{game.dateAdded}</span>
                 </div>
               </div>
-              <Badge className={`${getStatusColor(game.status)} text-xs`}>
-                {game.status}
-              </Badge>
-            </div>
-
-            <div className="mt-3 flex items-center gap-2">
-              {getRatingStars(game.rating)}
-              <span className="text-xs text-quokka-light/40 ml-1">
-                {game.rating.toFixed(1)}
-              </span>
+              <div className="flex flex-col items-end gap-2">
+                <Badge className={`${getStatusColor(game.status)} text-xs`}>
+                  {game.status}
+                </Badge>
+                {game.rating > 0 && (
+                  <Badge
+                    className={`${getRatingColor(game.rating)} text-xs px-2 py-1 font-medium`}
+                  >
+                    {formatRating(game.rating)}
+                  </Badge>
+                )}
+              </div>
             </div>
 
             <div className="mt-auto pt-3 flex flex-wrap gap-2">
-              {game.genres.map((genre: string) => (
-                <span
-                  key={genre}
-                  className="px-2 py-0.5 bg-quokka-dark/50 rounded-full text-xs text-quokka-light/60"
-                >
-                  {genre}
-                </span>
-              ))}
+              {game.genres &&
+                game.genres.map((genre: string) => (
+                  <span
+                    key={genre}
+                    className="px-2 py-0.5 bg-quokka-dark/50 rounded-full text-xs text-quokka-light/60"
+                  >
+                    {genre}
+                  </span>
+                ))}
             </div>
 
             {/* Game Stats */}

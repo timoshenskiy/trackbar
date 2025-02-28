@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { ProfileContent } from "./components/ProfileContent";
 import { getServerUser } from "@/utils/supabase/server-auth";
+import { getUserGames } from "@/app/helpers/getUserGames";
 
 interface UserData {
   username: string;
@@ -27,6 +28,11 @@ export default async function UserProfilePage({
     notFound();
   }
 
+  // Fetch user games data server-side
+  const userGamesData = await getUserGames({
+    username,
+  });
+
   const typedUserData = userData as unknown as UserData;
   const isOwnProfile = currentUser?.user_metadata?.username === username;
 
@@ -36,6 +42,7 @@ export default async function UserProfilePage({
       username={typedUserData.username}
       fullName={typedUserData.full_name}
       avatarUrl={typedUserData.avatar_url}
+      initialGamesData={userGamesData.games}
     />
   );
 }

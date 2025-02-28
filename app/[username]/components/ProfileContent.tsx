@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import {
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { useUserGames } from "@/hooks/useUserGames";
 import { ProfileHeader } from "./ProfileHeader";
 import { StatsCards } from "./StatsCards";
 import { ProfileTabs } from "./ProfileTabs";
@@ -11,210 +17,19 @@ import { GameSearchResult } from "@/utils/types/game";
 import AddGameModal from "@/components/AddGameModal";
 import SearchModal from "@/components/search/search-modal";
 
-// Mock data based on the provided JSON structure
-const mockData = {
-  games: [
-    {
-      id: "cd77a3b1-9ec6-4d77-8445-12c99309cdf9",
-      user_id: "26f3b5fc-f2f4-4efe-b9b0-ccaa41948c0e",
-      game_id: 304232,
-      status: "want_to_play",
-      rating: 2.7,
-      review: "",
-      platform_id: 411,
-      source: "manual",
-      playtime_minutes: 0,
-      achievements_total: 0,
-      achievements_completed: 0,
-      created_at: "2025-02-26T15:10:09.408",
-      updated_at: "2025-02-26T15:10:09.408",
-      games: {
-        id: 304232,
-        name: "Lexibook Batman Compact Cyber Arcade Portable Console",
-        slug: "lexibook-batman-compact-cyber-arcade-portable-console",
-        cover: {
-          url: "//images.igdb.com/igdb/image/upload/t_thumb/co8amt.jpg",
-        },
-        summary:
-          "Introducing the Lexibook Batman Compact Cyber Arcade Portable Console, your gateway to a world of endless entertainment!",
-        total_rating: null,
-        game_to_genres: [
-          {
-            genres: {
-              name: "Arcade",
-            },
-          },
-        ],
-        game_to_platforms: [
-          {
-            platforms: {
-              name: "Handheld Electronic LCD",
-            },
-          },
-        ],
-        first_release_date: "2024-03-06T00:00:00+00:00",
-      },
-      platforms: {
-        id: 411,
-        name: "Handheld Electronic LCD",
-        slug: "handheld-electronic-lcd",
-      },
-    },
-    {
-      id: "cd77a3b1-9ec6-4d77-8445-12c99309cdf8",
-      user_id: "26f3b5fc-f2f4-4efe-b9b0-ccaa41948c0e",
-      game_id: 304233,
-      status: "finished",
-      rating: 4.5,
-      review: "Great game!",
-      platform_id: 48,
-      source: "steam",
-      playtime_minutes: 1200,
-      achievements_total: 50,
-      achievements_completed: 45,
-      created_at: "2025-01-15T10:20:30.408",
-      updated_at: "2025-01-15T10:20:30.408",
-      games: {
-        id: 304233,
-        name: "Elden Ring",
-        slug: "elden-ring",
-        cover: {
-          url: "//images.igdb.com/igdb/image/upload/t_thumb/co4jni.jpg",
-        },
-        summary:
-          "Elden Ring is an action RPG developed by FromSoftware and published by Bandai Namco Entertainment.",
-        total_rating: 95,
-        game_to_genres: [
-          {
-            genres: {
-              name: "RPG",
-            },
-          },
-          {
-            genres: {
-              name: "Action",
-            },
-          },
-        ],
-        game_to_platforms: [
-          {
-            platforms: {
-              name: "PC",
-            },
-          },
-        ],
-        first_release_date: "2022-02-25T00:00:00+00:00",
-      },
-      platforms: {
-        id: 48,
-        name: "PC",
-        slug: "pc",
-      },
-    },
-    {
-      id: "cd77a3b1-9ec6-4d77-8445-12c99309cdf7",
-      user_id: "26f3b5fc-f2f4-4efe-b9b0-ccaa41948c0e",
-      game_id: 304234,
-      status: "playing",
-      rating: 4.0,
-      review: "",
-      platform_id: 167,
-      source: "playstation",
-      playtime_minutes: 600,
-      achievements_total: 40,
-      achievements_completed: 15,
-      created_at: "2025-02-10T08:15:20.408",
-      updated_at: "2025-02-10T08:15:20.408",
-      games: {
-        id: 304234,
-        name: "God of War Ragnarök",
-        slug: "god-of-war-ragnarok",
-        cover: {
-          url: "//images.igdb.com/igdb/image/upload/t_thumb/co5s5v.jpg",
-        },
-        summary:
-          "God of War Ragnarök is an action-adventure game developed by Santa Monica Studio and published by Sony Interactive Entertainment.",
-        total_rating: 94,
-        game_to_genres: [
-          {
-            genres: {
-              name: "Action",
-            },
-          },
-          {
-            genres: {
-              name: "Adventure",
-            },
-          },
-        ],
-        game_to_platforms: [
-          {
-            platforms: {
-              name: "PlayStation 5",
-            },
-          },
-        ],
-        first_release_date: "2022-11-09T00:00:00+00:00",
-      },
-      platforms: {
-        id: 167,
-        name: "PlayStation 5",
-        slug: "ps5",
-      },
-    },
-    {
-      id: "cd77a3b1-9ec6-4d77-8445-12c99309cdf6",
-      user_id: "26f3b5fc-f2f4-4efe-b9b0-ccaa41948c0e",
-      game_id: 304235,
-      status: "dropped",
-      rating: 2.0,
-      review: "Couldn't get into it",
-      platform_id: 49,
-      source: "xbox",
-      playtime_minutes: 120,
-      achievements_total: 30,
-      achievements_completed: 5,
-      created_at: "2024-12-05T14:30:45.408",
-      updated_at: "2024-12-05T14:30:45.408",
-      games: {
-        id: 304235,
-        name: "Cyberpunk 2077",
-        slug: "cyberpunk-2077",
-        cover: {
-          url: "//images.igdb.com/igdb/image/upload/t_thumb/co4hk8.jpg",
-        },
-        summary:
-          "Cyberpunk 2077 is an open-world, action-adventure RPG set in the megalopolis of Night City.",
-        total_rating: 85,
-        game_to_genres: [
-          {
-            genres: {
-              name: "RPG",
-            },
-          },
-          {
-            genres: {
-              name: "FPS",
-            },
-          },
-        ],
-        game_to_platforms: [
-          {
-            platforms: {
-              name: "Xbox Series X",
-            },
-          },
-        ],
-        first_release_date: "2020-12-10T00:00:00+00:00",
-      },
-      platforms: {
-        id: 49,
-        name: "Xbox Series X",
-        slug: "xbox-series-x",
-      },
-    },
-  ],
-};
+// Create a client
+const queryClient = new QueryClient();
+
+// Wrapper component to provide the query client
+function ProfileContentWithQueryClient(
+  props: ProfileContentProps & { initialGamesData: any[] }
+) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ProfileContentInner {...props} />
+    </QueryClientProvider>
+  );
+}
 
 export interface ProfileContentProps {
   isOwnProfile: boolean;
@@ -223,28 +38,53 @@ export interface ProfileContentProps {
   avatarUrl?: string;
 }
 
-export function ProfileContent({
+function ProfileContentInner({
   isOwnProfile,
   username,
   fullName,
   avatarUrl,
-}: ProfileContentProps) {
+  initialGamesData,
+}: ProfileContentProps & { initialGamesData: any[] }) {
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "row">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "row">("row");
   const [selectedGame, setSelectedGame] = useState<GameSearchResult | null>(
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
+  // Set up the query client
+  const queryClient = useQueryClient();
+
+  // Pre-populate the query cache with the initial data
+  if (initialGamesData && initialGamesData.length > 0) {
+    queryClient.setQueryData(["userGames", username], {
+      games: initialGamesData,
+      isOwnProfile,
+    });
+  }
+
+  // Use the React Query hook
+  const {
+    data: userGamesData,
+    isLoading,
+    error,
+  } = useUserGames({
+    username,
+    enabled: true,
+  });
+
+  // Use the data from the query or the initial data
+  const games = userGamesData?.games || initialGamesData || [];
+
   // Transform the data for the UI
-  const transformedGames = mockData.games.map((game) => ({
+  const transformedGames = games.map((game: any) => ({
     id: parseInt(game.game_id.toString()),
     title: game.games.name,
-    cover: game.games.cover.url,
-    genres: game.games.game_to_genres.map((g) => g.genres.name),
-    platform: game.platforms.name,
+    cover: game.games.cover?.url,
+    genres: game.games.game_to_genres?.map((g: any) => g.genres.name) || [],
+    platform: game.platforms?.name || "Unknown",
     status: (game.status === "want_to_play"
       ? "Want"
       : game.status === "finished"
@@ -254,13 +94,13 @@ export function ProfileContent({
           : game.status === "dropped"
             ? "Dropped"
             : game.status) as "Want" | "Finished" | "Playing" | "Dropped",
-    rating: game.rating,
-    playtime: Math.round(game.playtime_minutes / 60),
+    rating: game.rating || 0,
+    playtime: Math.round((game.playtime_minutes || 0) / 60),
     achievements: {
-      completed: game.achievements_completed,
-      total: game.achievements_total,
+      completed: game.achievements_completed || 0,
+      total: game.achievements_total || 0,
     },
-    source: game.source,
+    source: game.source || "manual",
     dateAdded: new Date(game.created_at).toLocaleDateString(),
   }));
 
@@ -419,12 +259,42 @@ export function ProfileContent({
   const handleModalSuccess = () => {
     setIsModalOpen(false);
     setSelectedGame(null);
-    // No need to invalidate queries since we're using mock data
+    // Invalidate the query to refresh the data
+    queryClient.invalidateQueries({ queryKey: ["userGames"] });
   };
 
   const handleSearchModalOpen = () => {
     setIsSearchModalOpen(true);
   };
+
+  // Show loading state
+  if (isLoading && !initialGamesData) {
+    return (
+      <div className="flex-1 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center py-12">
+            <div className="text-quokka-light/40 mb-2">Loading games...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex-1 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center py-12">
+            <div className="text-red-500 mb-2">Error loading games</div>
+            <div className="text-sm text-quokka-light/30">
+              Please try again later
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-4 md:p-8">
@@ -491,3 +361,6 @@ export function ProfileContent({
     </div>
   );
 }
+
+// Export the wrapper component
+export { ProfileContentWithQueryClient as ProfileContent };

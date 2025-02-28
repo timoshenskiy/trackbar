@@ -1,5 +1,3 @@
-"use client";
-
 import { Pencil, Trophy, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 

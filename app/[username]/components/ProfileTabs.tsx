@@ -1,5 +1,3 @@
-"use client";
-
 interface TabItem {
   name: string;
   count: number;
