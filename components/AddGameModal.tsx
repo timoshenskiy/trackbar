@@ -52,9 +52,12 @@ export default function AddGameModal({
   const isSubmitting =
     addGameMutation.isPending || updateGameMutation.isPending;
 
-  // Initialize with existing data if editing
+  // Initialize with existing data if editing or from AI chat
   useEffect(() => {
-    if (isEditing && game) {
+    if (
+      (isEditing || game.userRating || game.userStatus || game.userReview) &&
+      game
+    ) {
       // Try to extract status from game data if available
       if (game.userStatus) {
         const statusMap: Record<

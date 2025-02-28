@@ -1,10 +1,11 @@
-import { Home, Gamepad2, Settings, Plus, LogOut } from "lucide-react";
+import { Home, Gamepad2, Settings, Plus, LogOut, Bot } from "lucide-react";
 
 import { Button } from "./ui/button";
 import SidebarLink from "./SidebarLink";
 
 import { getServerUser } from "@/utils/supabase/server-auth";
 import { signOutAction } from "@/app/actions";
+import AIChatButton from "./AIChatButton";
 
 const Sidebar = async () => {
   const user = await getServerUser();
@@ -41,16 +42,26 @@ const Sidebar = async () => {
       </div>
 
       {/* Add Game Button */}
-      <div className="p-3 border-t border-quokka-purple/10">
+      <div className="p-3 border-t border-quokka-darker">
         <Button className="w-full bg-gradient-to-r from-quokka-purple to-quokka-cyan hover:opacity-90 transition-opacity text-white rounded-lg flex items-center justify-center gap-2 py-2.5">
           <Plus className="w-5 h-5" />
           <span className="hidden md:block">Add Game</span>
         </Button>
       </div>
 
+      {/* AI Assistant Button */}
+      <div className="p-3">
+        <AIChatButton>
+          <Button className="w-full bg-quokka-dark hover:bg-quokka-dark/80 text-quokka-cyan border border-quokka-cyan/30 transition-colors rounded-lg flex items-center justify-center gap-2 py-2.5">
+            <Bot className="w-5 h-5" />
+            <span className="hidden md:block">Game Assistant</span>
+          </Button>
+        </AIChatButton>
+      </div>
+
       {/* User Section */}
       {user && (
-        <div className="p-3 border-t border-quokka-purple/10">
+        <div className="p-3 border-t border-quokka-darker">
           <div className="flex items-center gap-3 p-2 rounded-lg bg-quokka-dark/30 hover:bg-quokka-dark/50 transition-colors">
             <div className="w-10 h-10 rounded-lg bg-quokka-purple/20 flex items-center justify-center text-quokka-cyan font-bold">
               {user.user_metadata.username?.[0].toUpperCase() || "U"}
